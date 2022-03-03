@@ -1098,7 +1098,7 @@ async function runner_manager() {
       };
       runners.wine.push({
         name: 'GE-Wine',
-        path: hlu_packspath+'/GE-Wine'
+        path: hlu_packspath+'/GE-Wine/bin/wine'
       });
       fs.outputJsonSync(hlu_userpath+'/runners.json', runners, {spaces: 2});
       break;
