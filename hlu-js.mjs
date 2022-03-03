@@ -83,6 +83,13 @@ fs.ensureDirSync(hlu_relpath);
 fs.ensureDirSync(hlu_historypath);
 fs.ensureDirSync(hlu_logspath);
 fs.ensureDirSync(hlu_defproton);
+if (!fs.existsSync(hlu_userpath+'/settings.json') || !fs.existsSync(hlu_userpath+'/packages.json')) {
+  cd(hlu_userpath);
+  await $`git clone https://github.com/sergeyhist/hlu-js.git`;
+  fs.copySync('hlu-js/settings.json', hlu_userpath+'/settings.json');
+  fs.copySync('hlu-js/packages.json', hlu_userpath+'/packages.json');
+  fs.removeSync('hlu-js');
+};
 if (!fs.existsSync(hlu_userpath+'/prefixes.json')) {
   fs.outputJsonSync(hlu_userpath+'/prefixes.json', {
     wine: [
