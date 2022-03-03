@@ -1,0 +1,381 @@
+[
+  {
+    "name": "Main settings",
+    "settings": [
+      {
+        "name": "Add arguments",
+        "example_value": "input_value",
+        "value": ""
+      },
+      {
+        "name": "Add variables or commands",
+        "example_value": "input_value",
+        "value": ""
+      },
+      {
+        "name": "Enable pulse audio latency",
+        "example_value": "PULSE_LATENCY_MSEC=input_value",
+        "default_value": "60",
+        "value": ""
+      },
+      {
+        "name": "Enable gamemode",
+        "example_value": "gamemoderun",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/bin/gamemoderun"]
+        }
+      },
+      {
+        "name": "Enable mangohud",
+        "example_value": "mangohud",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/bin/mangohud"]
+        }
+      },
+      {
+        "name": "Enable vkBasalt",
+        "example_value": "ENABLE_VKBASALT=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/lib/libvkbasalt.so"]
+        }
+      },
+      {
+        "name": "Enable debug",
+        "example_value": "on",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "Wine Settings",
+    "settings": [
+      {
+        "name": "Enable ESYNC",
+        "example_value": "WINEESYNC=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","legendary"]
+        }
+      },
+      {
+        "name": "Enable FSYNC",
+        "example_value": "WINEFSYNC=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","legendary"]
+        }
+      },
+      {
+        "name": "Enable virtual desktop",
+        "example_value": "explorer /desktop='launcher_name',input_value",
+        "default_value": "1920x1080",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Proton Settings",
+    "settings": [
+      {
+        "name": "Enable wined3d",
+        "example_value": "PROTON_USE_WINED3D=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Enable large address aware",
+        "example_value": "PROTON_FORCE_LARGE_ADDRESS_AWARE=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Enable old GL string",
+        "example_value": "PROTON_OLD_GL_STRING=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Enable Seccomp",
+        "example_value": "PROTON_USE_SECCOMP=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable D3D12",
+        "example_value": "PROTON_NO_D3D12=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable D3D11",
+        "example_value": "PROTON_NO_D3D11=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable D3D10",
+        "example_value": "PROTON_NO_D3D10=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable D3D9",
+        "example_value": "PROTON_NO_D3D9=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable ESYNC",
+        "example_value": "PROTON_NO_ESYNC=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable FSYNC",
+        "example_value": "PROTON_NO_FSYNC=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      },
+      {
+        "name": "Disable FUTEX2",
+        "example_value": "PROTON_NO_FUTEX2=0",
+        "value": "",
+        "limitation": {
+          "launcher": ["proton"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "FSR Settings",
+    "settings": [
+      {
+        "name": "Enable Wine FSR",
+        "example_value": "WINE_FULLSCREEN_FSR=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","proton","legendary"]
+        }
+      },
+      {
+        "name": "Set Wine FSR strength",
+        "example_value": "WINE_FULLSCREEN_FSR_STRENGTH=input_value",
+        "default_value": "2",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","proton","legendary"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Strangle settings",
+    "settings": [
+      {
+        "name": "Enable libstrangle",
+        "example_value": "strangle",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Set max framerate",
+        "example_value": "STRANGLE_FPS=input_value",
+        "default_value": "60",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Set max framerate for battery power",
+        "example_value": "STRANGLE_FPS_BATTERY=input_value",
+        "default_value": "60",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Enable Vsync",
+        "example_value": "STRANGLE_VSYNC=input_value",
+        "default_value": "2",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Run glFinish after every frame",
+        "example_value": "STRANGLE_GLFINISH=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Set mip-map LoD bias",
+        "example_value": "STRANGLE_PICMIP=input_value",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Set anisotropic filtering level (Vulkan only)",
+        "example_value": "STRANGLE_AF=input_value",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Enable force trilinear filtering (Vulkan only)",
+        "example_value": "STRANGLE_TRILINEAR=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Disable linear texture filtering (Vulkan only)",
+        "example_value": "STRANGLE_RETRO=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Disable dlsym hooking",
+        "example_value": "STRANGLE_NODLSYM=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Stop strangle OpenGL libs from loading",
+        "example_value": "STRANGLE_VKONLY=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Enable the implicit Vulkan layer",
+        "example_value": "ENABLE_VK_LAYER_TORKEL104_libstrangle=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      },
+      {
+        "name": "Disable the implicit Vulkan layer",
+        "example_value": "DISABLE_VK_LAYER_TORKEL104_libstrangle=1",
+        "value": "",
+        "limitation": {
+          "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "DXVK Settings",
+    "settings": [
+      {
+        "name": "Enable DxvkHUD",
+        "example_value": "DXVK_HUD=input_value",
+        "default_value": "full",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","proton","legendary"]
+        }
+      },
+      {
+        "name": "Enable Dxvk async",
+        "example_value": "DXVK_ASYNC=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","proton","legendary"]
+        }
+      },
+      {
+        "name": "Disable state cache",
+        "example_value": "DXVK_STATE_CACHE=0",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","proton","legendary"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Nvidia GPU Settings",
+    "settings": [
+      {
+        "name": "Enable threaded optimizations",
+        "example_value": "__GL_THREADED_OPTIMIZATIONS=1",
+        "value": "",
+        "limitation": {
+          "video": "NVIDIA"
+        }
+      },
+      {
+        "name": "Enable graphics API visual indicator",
+        "example_value": "__GL_SHOW_GRAPHICS_OSD=1",
+        "value": "",
+        "limitation": {
+          "video": "NVIDIA"
+        }
+      }
+    ]
+  },
+  {
+    "name": "AMD GPU Settings",
+    "settings": [
+      {
+        "name": "Enable threaded optimizations",
+        "example_value": "mesa_glthread=true",
+        "value": "",
+        "limitation": {
+          "video": "AMD"
+        }
+      },
+      {
+        "name": "Enable radeon ACO vulkan compiler",
+        "example_value": "RADV_PERFTEST=aco",
+        "value": "",
+        "limitation": {
+          "video": "AMD"
+        }
+      }
+    ]
+  }
+]
