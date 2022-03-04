@@ -1,6 +1,6 @@
 #!/usr/bin/env zx
 "use strict"
-import {spawnSync} from 'child_process';
+import {spawnSync, exec} from 'child_process';
 process.on('beforeExit', async () => {
   if (hlu_flags.restart == 0) {
     await script_exit()
@@ -123,7 +123,9 @@ if (!fs.existsSync(hlu_userpath+'/runners.json')) {
 };
 
 // Init const variables
-await steam_apps_init();
+if (fs.existsSync(os.homedir+'/.steam')) {
+  await steam_apps_init();
+};
 hlu_list_init();
 
 // Main
@@ -150,6 +152,9 @@ switch (await list_options({
           case '3':
             await launcher_init('linux');
             break;
+          case '4':
+            await launcher_init('legendary');
+            break;
         };
         break;
       case '2':
@@ -162,7 +167,7 @@ switch (await list_options({
         await launcher_remover();
         break;
       case '5':
-        launcher_generator();
+        await launcher_generator();
         break;
       case '6':
         await launcher_info();
@@ -207,6 +212,10 @@ switch (await list_options({
         await runner_manager();
         break;
     };
+    break;
+  case '3':
+    await legendary_helper();
+    break;
 };
 
 
@@ -549,6 +558,33 @@ async function launcher_init(type) {
       launcher.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('launcher'), 'launcher_names',
         path.basename(launcher.info.exec));
       break;
+    case 'legendary':
+      launcher.info.prefix = await general_selector('prefixes', 'wine');
+      launcher.info.runner = await general_selector('runners', 'wine');
+      let egs_app = await legendary_list('installed', {full: true});
+      launcher.name = egs_app.name;
+      launcher.info.id = egs_app.id;
+      if (fs.existsSync(launcher.info.prefix+'/drive_c/users/steamuser')) {
+        let user_names = [os.userInfo().username, 'steamuser'];
+        launcher.info.user = user_names[+await list_options({
+          name: 'User Names (for cloud saves)',
+          items: user_names
+        })-1];
+      } else {
+        launcher.info.user = os.userInfo().username;
+      };
+      let egs_user_info = fs.readJsonSync(os.homedir+'/.config/legendary/user.json');
+      let egs_app_info = await quiet($`legendary info ${launcher.info.id} --json`)
+      egs_app_info = JSON.parse(egs_app_info.stdout);
+      if (egs_app_info.game.cloud_saves_supported == true) {
+        launcher.info.save_path = egs_app_info.game.cloud_save_folder
+        .replace('{AppData}', launcher.info.prefix+'/drive_c/users/'+launcher.info.user+'/AppData/Local')
+        .replace('{UserSavedGames}', launcher.info.prefix+'/drive_c/users/'+launcher.info.user+'/Saved Games')
+        .replace('{UserDir}', launcher.info.prefix+'/drive_c/users/'+launcher.info.user+'/Documents')
+        .replace('{InstallDir}', egs_app_info.install.install_path)
+        .replace('{EpicID}', egs_user_info.client_id);
+      };
+      break;
   };
   settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
   for (let i in settings) {
@@ -595,126 +631,129 @@ async function settings_init(launcher, settings) {
   while (setting_menu != '0') {
     setting_menu = await list_options({
       name: 'Settings',
-      items: list_init(settings, 'name')
+      items: list_init(settings, 'name'),
+      options: ['continue']
     });
-    do {
-      setting_item = await list_options({
-        name: settings[+setting_menu-1].name,
-        items: list_init(settings[+setting_menu-1].settings, 'name'),
-        values: list_init(settings[+setting_menu-1].settings, 'value'),
-        options: ['continue']
-      });
-      if (setting_item != '0') {
-        limit_flag = 0;
-        selected_setting = settings[+setting_menu-1].settings[+setting_item-1];
-        if (selected_setting.limitation?.file) {
-          for (let item of selected_setting.limitation.file) {
-            if (fs.existsSync(item)) {
+    if (setting_menu != 0) {
+      do {
+        setting_item = await list_options({
+          name: settings[+setting_menu-1].name,
+          items: list_init(settings[+setting_menu-1].settings, 'name'),
+          values: list_init(settings[+setting_menu-1].settings, 'value'),
+          options: ['continue']
+        });
+        if (setting_item != '0') {
+          limit_flag = 0;
+          selected_setting = settings[+setting_menu-1].settings[+setting_item-1];
+          if (selected_setting.limitation?.file) {
+            for (let item of selected_setting.limitation.file) {
+              if (fs.existsSync(item)) {
+                limit_flag = 1;
+              };
+            };
+            if (limit_flag == 0) {
+              console.log('\n'+chalk.green(selected_setting.limitation.file)+chalk.red(' not installed!'));
+            };
+          } else if (selected_setting.limitation?.launcher) {
+            if (selected_setting.limitation.launcher.includes(launcher.info.type)) {
               limit_flag = 1;
-            };
-          };
-          if (limit_flag == 0) {
-            console.log('\n'+chalk.green(selected_setting.limitation.file)+chalk.red(' not installed!'));
-          };
-        } else if (selected_setting.limitation?.launcher) {
-          if (selected_setting.limitation.launcher.includes(launcher.info.type)) {
-            limit_flag = 1;
-          } else {
-            console.log('\n'+'Only for '+chalk.green(selected_setting.limitation.launcher.join(',')));
-          };
-        } else if (selected_setting.limitation?.video) {
-          if (gpu_version.stdout.includes(selected_setting.limitation.video)) {
-            limit_flag = 1;
-          } else {
-            console.log('\n'+'Only for '+chalk.green(selected_setting.limitation.video));
-          };
-        } else {
-          limit_flag = 1;
-        };
-        if (limit_flag == 1) {
-          if (selected_setting.example_value.includes('input_value')) {
-            let input_text;
-            let additional_text;
-            switch (selected_setting.name) {
-              case 'Add arguments':
-                input_text = 'Enter '+chalk.cyan('arguments')+' (Example: '+chalk.cyan('-windowed')+')';
-                break;
-              case 'Add variables or commands':
-                input_text = 'Enter '+chalk.cyan('variables')+' or '+chalk.cyan('commands')+' (Example: '+chalk.cyan('gamemoderun')+' or '+chalk.cyan('WINEESYNC=1')+')';
-                break;
-              case 'Enable pulse audio latency':
-                input_text = 'Enter '+chalk.cyan('pulse audio')+chalk.cyan('latency')+' (Example: '+chalk.cyan('90')+')';
-                break;
-              case 'Enable pulse audio latency':
-                input_text = 'Enter '+chalk.cyan('pulse audio')+chalk.cyan('latency')+' (Example: '+chalk.cyan('90')+')';
-                break;
-              case 'Enable virtual desktop':
-                input_text = 'Enter '+chalk.cyan('width')+' and '+chalk.cyan('height')+' of '+chalk.green('virtual desktop')+' (Example: '+chalk.cyan('1600x900')+')';
-                break;
-              case 'Set Wine FSR strength':
-                input_text = 'Enter '+chalk.green('FSR strength')+chalk.cyan(' value ')+'('+chalk.cyan('0')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('5')+')';
-                break;
-              case 'Set max framerate':
-                input_text = 'Enter '+chalk.cyan('maximum framerate');
-                break;
-              case 'Set max framerate for battery power':
-                input_text = 'Enter '+chalk.cyan('maximum framerate')+' when running on '+chalk.green('battery power');
-                break;
-              case 'Enable Vsync':
-                additional_text = '\n\t'+chalk.green('OpenGL')+'\n'+
-                chalk.cyan(' -1')+' - Adaptive sync (unconfirmed if this actually works)\n'+
-                chalk.cyan(' 0')+' - Force off\n'+
-                chalk.cyan(' 1')+' - Force on\n'+
-                chalk.cyan(' n')+' - Sync to refresh rate / n\n'+
-                '\t'+chalk.green('Vulkan')+'\n'+
-                chalk.cyan(' 0')+' - Force off\n'+
-                chalk.cyan(' 1')+' - Mailbox mode. Vsync with uncapped framerate\n'+
-                chalk.cyan(' 2')+' - Traditional vsync with framerate capped to refresh rate\n'+
-                chalk.cyan(' 3')+' - Adaptive vsync with tearing at low framerates\n';
-                input_text = 'Enter '+chalk.green('Vsync ')+chalk.cyan('value');
-                break;
-              case 'Set mip-map LoD bias':
-                input_text = 'Enter '+chalk.green('mip-map LoD bias')+chalk.cyan(' value ')+'('+chalk.cyan('-16')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('16')+')';
-                break;
-              case 'Set anisotropic filtering level (Vulkan only)':
-                input_text = 'Enter '+chalk.green('anisotropic filtering')+chalk.cyan(' value ')+'('+chalk.cyan('1')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('16')+')';
-                break;
-              case 'Enable DxvkHUD':
-                additional_text = '\n'+chalk.cyan(' devinfo')+' - Displays the name of the GPU and the driver version\n'+
-                chalk.cyan(' fps')+' - Shows the current frame rate\n'+
-                chalk.cyan(' frametimes')+' - Shows a frame time graph\n'+
-                chalk.cyan(' submissions')+' - Shows the number of command buffers submitted per frame\n'+
-                chalk.cyan(' drawcalls')+' - Shows the number of draw calls and render passes per frame\n'+
-                chalk.cyan(' pipelines')+' - Shows the total number of graphics and compute pipelines\n'+
-                chalk.cyan(' memory')+' - Shows the amount of device memory allocated and used\n'+
-                chalk.cyan(' gpuload')+' - Shows estimated GPU load. May be inaccurate\n'+
-                chalk.cyan(' version')+' - Shows DXVK version\n'+
-                chalk.cyan(' api')+' - Shows the D3D feature level used by the application\n'+
-                chalk.cyan(' compiler')+' - Shows shader compiler activity\n'+
-                chalk.cyan(' samplers')+' - Shows the current number of sampler pairs used [D3D9 Only]\n'+
-                chalk.cyan(' scale=value')+' - Scales the HUD by a factor of x (e.g. 1.5)\n'+
-                chalk.cyan(' full')+' - Enable all options\n';
-                input_text = 'Enter '+chalk.green('DxvkHUD ')+chalk.cyan('options')+' (Example: '+chalk.cyan('fps,frametimes,scale=0.8')+')';
-                break;
-            }
-            setting_input = await general_input(input_text, selected_setting.name.replace(/ /g,'_'), selected_setting.default_value, additional_text);
-            if (setting_input != '') {
-              settings[+setting_menu-1].settings[+setting_item-1].value = selected_setting.example_value
-                .replace('input_value', setting_input)
-                .replace('launcher_name', launcher.name.replace(/ /g,'_'));
             } else {
-              settings[+setting_menu-1].settings[+setting_item-1].value = '';
+              console.log('\n'+'Only for '+chalk.green(selected_setting.limitation.launcher.join(',')));
+            };
+          } else if (selected_setting.limitation?.video) {
+            if (gpu_version.stdout.includes(selected_setting.limitation.video)) {
+              limit_flag = 1;
+            } else {
+              console.log('\n'+'Only for '+chalk.green(selected_setting.limitation.video));
             };
           } else {
-            if (settings[+setting_menu-1].settings[+setting_item-1].value == '') {
-              settings[+setting_menu-1].settings[+setting_item-1].value = selected_setting.example_value;
+            limit_flag = 1;
+          };
+          if (limit_flag == 1) {
+            if (selected_setting.example_value.includes('input_value')) {
+              let input_text;
+              let additional_text;
+              switch (selected_setting.name) {
+                case 'Add arguments':
+                  input_text = 'Enter '+chalk.cyan('arguments')+' (Example: '+chalk.cyan('-windowed')+')';
+                  break;
+                case 'Add variables or commands':
+                  input_text = 'Enter '+chalk.cyan('variables')+' or '+chalk.cyan('commands')+' (Example: '+chalk.cyan('gamemoderun')+' or '+chalk.cyan('WINEESYNC=1')+')';
+                  break;
+                case 'Enable pulse audio latency':
+                  input_text = 'Enter '+chalk.cyan('pulse audio')+chalk.cyan('latency')+' (Example: '+chalk.cyan('90')+')';
+                  break;
+                case 'Enable pulse audio latency':
+                  input_text = 'Enter '+chalk.cyan('pulse audio')+chalk.cyan('latency')+' (Example: '+chalk.cyan('90')+')';
+                  break;
+                case 'Enable virtual desktop':
+                  input_text = 'Enter '+chalk.cyan('width')+' and '+chalk.cyan('height')+' of '+chalk.green('virtual desktop')+' (Example: '+chalk.cyan('1600x900')+')';
+                  break;
+                case 'Set Wine FSR strength':
+                  input_text = 'Enter '+chalk.green('FSR strength')+chalk.cyan(' value ')+'('+chalk.cyan('0')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('5')+')';
+                  break;
+                case 'Set max framerate':
+                  input_text = 'Enter '+chalk.cyan('maximum framerate');
+                  break;
+                case 'Set max framerate for battery power':
+                  input_text = 'Enter '+chalk.cyan('maximum framerate')+' when running on '+chalk.green('battery power');
+                  break;
+                case 'Enable Vsync':
+                  additional_text = '\n\t'+chalk.green('OpenGL')+'\n'+
+                  chalk.cyan(' -1')+' - Adaptive sync (unconfirmed if this actually works)\n'+
+                  chalk.cyan(' 0')+' - Force off\n'+
+                  chalk.cyan(' 1')+' - Force on\n'+
+                  chalk.cyan(' n')+' - Sync to refresh rate / n\n'+
+                  '\t'+chalk.green('Vulkan')+'\n'+
+                  chalk.cyan(' 0')+' - Force off\n'+
+                  chalk.cyan(' 1')+' - Mailbox mode. Vsync with uncapped framerate\n'+
+                  chalk.cyan(' 2')+' - Traditional vsync with framerate capped to refresh rate\n'+
+                  chalk.cyan(' 3')+' - Adaptive vsync with tearing at low framerates\n';
+                  input_text = 'Enter '+chalk.green('Vsync ')+chalk.cyan('value');
+                  break;
+                case 'Set mip-map LoD bias':
+                  input_text = 'Enter '+chalk.green('mip-map LoD bias')+chalk.cyan(' value ')+'('+chalk.cyan('-16')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('16')+')';
+                  break;
+                case 'Set anisotropic filtering level (Vulkan only)':
+                  input_text = 'Enter '+chalk.green('anisotropic filtering')+chalk.cyan(' value ')+'('+chalk.cyan('1')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('16')+')';
+                  break;
+                case 'Enable DxvkHUD':
+                  additional_text = '\n'+chalk.cyan(' devinfo')+' - Displays the name of the GPU and the driver version\n'+
+                  chalk.cyan(' fps')+' - Shows the current frame rate\n'+
+                  chalk.cyan(' frametimes')+' - Shows a frame time graph\n'+
+                  chalk.cyan(' submissions')+' - Shows the number of command buffers submitted per frame\n'+
+                  chalk.cyan(' drawcalls')+' - Shows the number of draw calls and render passes per frame\n'+
+                  chalk.cyan(' pipelines')+' - Shows the total number of graphics and compute pipelines\n'+
+                  chalk.cyan(' memory')+' - Shows the amount of device memory allocated and used\n'+
+                  chalk.cyan(' gpuload')+' - Shows estimated GPU load. May be inaccurate\n'+
+                  chalk.cyan(' version')+' - Shows DXVK version\n'+
+                  chalk.cyan(' api')+' - Shows the D3D feature level used by the application\n'+
+                  chalk.cyan(' compiler')+' - Shows shader compiler activity\n'+
+                  chalk.cyan(' samplers')+' - Shows the current number of sampler pairs used [D3D9 Only]\n'+
+                  chalk.cyan(' scale=value')+' - Scales the HUD by a factor of x (e.g. 1.5)\n'+
+                  chalk.cyan(' full')+' - Enable all options\n';
+                  input_text = 'Enter '+chalk.green('DxvkHUD ')+chalk.cyan('options')+' (Example: '+chalk.cyan('fps,frametimes,scale=0.8')+')';
+                  break;
+              }
+              setting_input = await general_input(input_text, selected_setting.name.replace(/ /g,'_'), selected_setting.default_value, additional_text);
+              if (setting_input != '') {
+                settings[+setting_menu-1].settings[+setting_item-1].value = selected_setting.example_value
+                  .replace('input_value', setting_input)
+                  .replace('launcher_name', launcher.name.replace(/ /g,'_'));
+              } else {
+                settings[+setting_menu-1].settings[+setting_item-1].value = '';
+              };
             } else {
-              settings[+setting_menu-1].settings[+setting_item-1].value = '';
+              if (settings[+setting_menu-1].settings[+setting_item-1].value == '') {
+                settings[+setting_menu-1].settings[+setting_item-1].value = selected_setting.example_value;
+              } else {
+                settings[+setting_menu-1].settings[+setting_item-1].value = '';
+              };
             };
           };
         };
-      };
-    } while (setting_item != '0');
+      } while (setting_item != '0');
+    };
   };
   return settings;
 }
@@ -806,16 +845,17 @@ async function launcher_editor() {
 async function launcher_runner() {
   let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
   let launcher = await general_selector('launchers', launchers)
-  await nothrow($`eval ${await launcher_command(launcher[1], launcher[1].settings)}`);
+  let command = await launcher_command(launcher[1], launcher[1].settings);
+  exec(command);
 }
 
-function launcher_generator() {
+async function launcher_generator() {
   let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
   fs.emptyDirSync(hlu_bspath);
   for (let item of launchers) {
     fs.writeFileSync(
       hlu_bspath+'/'+item.name.replace(/ /g,'_')+'.sh',
-      '#!/bin/bash\n'+launcher_command(item, item.settings)
+      '#!/bin/bash\n'+await launcher_command(item, item.settings)
     );
     fs.chmod(hlu_bspath+'/'+item.name.replace(/ /g,'_')+'.sh', 0o755);
   };
@@ -835,8 +875,8 @@ async function launcher_info() {
   console.log(launcher[1]);
 }
 
-function launcher_command(launcher,settings) {
-  let launcher_complete;
+async function launcher_command(launcher,settings) {
+  let launcher_complete = '';
   let launcher_debug = ' &> /dev/null'
   let launcher_command = {
     pre: [],
@@ -877,6 +917,13 @@ function launcher_command(launcher,settings) {
       break;
     case 'linux':
       launcher_complete = launcher_command.pre.join(' ')+space.pre+'"'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug;
+      break;
+    case 'legendary':
+      if (launcher.info.save_path) {
+        launcher_complete = 'yes | legendary sync-saves --skip-upload --save-path "'+launcher.info.save_path+'" '+launcher.info.id+launcher_debug.replace('>','>>')+'\n'
+      };
+      launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
+        'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+launcher_debug.replace('>','>>')
   };
   return launcher_complete;
 }
@@ -1186,4 +1233,104 @@ async function package_installer(type, pack) {
       };
       break;
   };
+}
+
+async function legendary_list(type, options) {
+  let apps_list = [];
+  let apps_list_json;
+  switch(type) {
+    case 'all':
+      apps_list_json = await quiet($`legendary list --json`);
+      apps_list_json = JSON.parse(apps_list_json.stdout);
+      for (let item of apps_list_json) {
+        apps_list.push({
+          name: item.app_title,
+          id: item.app_name
+       });
+      };
+      break;
+    case 'installed':
+      apps_list_json = await quiet($`legendary list-installed --json`);
+      apps_list_json = JSON.parse(apps_list_json.stdout);
+      for (let item of apps_list_json) {
+        apps_list.push({
+          name: item.title,
+          id: item.app_name
+       });
+      };
+      break;
+  };
+  if (options?.full == true) {
+    return apps_list[+await list_options({
+      name: 'EGS Games',
+      items: list_init(apps_list, 'name'),
+      descs: list_init(apps_list, 'id')
+    })-1];
+  };
+  return apps_list[+await list_options({
+    name: 'EGS Games',
+    items: list_init(apps_list, 'name'),
+    descs: list_init(apps_list, 'id')
+  })-1].id;
+}
+
+async function legendary_helper() {
+  if (fs.existsSync('/usr/local/bin/legendary') || fs.existsSync('/usr/bin/legendary')) {
+    switch(fs.existsSync(os.homedir+'/.config/legendary/user.json')) {
+      case false:
+        switch(await general_input(chalk.green('Sign in')+' ? '+chalk.cyan('y|N'))) {
+          case 'y': case 'Y':
+            await $`legendary auth`;
+          default:
+            break;
+        };
+      case true:
+        if (fs.existsSync(os.homedir+'/.config/legendary/user.json')) {
+          switch(await list_options({
+            name: 'Legendary Helper',
+            items: ['Sign out','Import game','Install game','Verify game','Repair game','Update game','Move game','Uninstall game','Check updates','Upload cloud saves','Fix cloud saves','Game info']
+          })) {
+            case '1':
+              await $`legendary auth --delete`;
+              break;
+            case '2':
+              await $`legendary import ${await legendary_list('all')} ${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}`;
+              break;
+            case '3':
+              await $`legendary install --base-path ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')} ${await legendary_list('all')}`
+              break;
+            case '4':
+              await $`legendary verify ${await legendary_list('installed')}`;
+              break;
+            case '5':
+              await $`legendary repair ${await legendary_list('installed')}`;
+              break;
+            case '6':
+              await $`legendary update ${await legendary_list('installed')}`;
+              break;
+            case '7':
+              await $`legendary move ${await legendary_list('installed')} ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}`;
+              break;
+            case '8':
+              await $`legendary uninstall ${await legendary_list('installed')}`;
+              break;
+            case '9':
+              await $`legendary list-installed --check-updates`;
+              break;
+            case '10':
+              await $`legendary sync-saves --skip-download --disable-filters`;
+              break;
+            case '11':
+              await $`legendary clean-saves`;
+              break;
+            case '12':
+              await $`legendary info ${await legendary_list('installed')}`;
+              break;
+          };
+        };
+    }
+  } else {
+    console.log(chalk.green('Legendary')+' '+chalk.cyan('not installed!'));
+  }
+  
 }
