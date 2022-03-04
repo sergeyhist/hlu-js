@@ -216,6 +216,9 @@ switch (await list_options({
   case '3':
     await legendary_helper();
     break;
+  case '4':
+    await systemd_controller();
+    break;
 };
 
 
@@ -1333,4 +1336,125 @@ async function legendary_helper() {
     console.log(chalk.green('Legendary')+' '+chalk.cyan('not installed!'));
   }
   
+}
+
+async function systemd_controller() {
+  let add_service = async () => {
+    let service = {
+      name: '',
+      path: '',
+      type: ''
+    };
+    service.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('service')+' (Example: '+chalk.cyan('gdm.service')+')', 'service_names');
+    let path = await quiet($`systemctl show --user -p FragmentPath ${service.name} | tr -d '\\n'`);
+    if (path.stdout == 'FragmentPath=') {
+      path = await quiet($`systemctl show -p FragmentPath ${service.name} | tr -d '\\n'`);
+      service.type = 'root';
+    } else {
+      service.type = 'user';
+    }
+    service.path = path.stdout.split('=').pop();
+    return service;
+  };
+  
+  let services = [];
+  let systemd_menu;
+  switch(fs.existsSync(hlu_userpath+'/services.json')) {
+    case false:
+      services.push(await add_service());
+      fs.outputJsonSync(hlu_userpath+'/services.json', services, {spaces: 2});
+    case true:
+      while (systemd_menu != 0) {
+        let service;
+        systemd_menu = await list_options({
+          name: 'Systemd Controller',
+          items: ['Services list','Add Service'],
+          options: ['continue']
+        });
+        if (systemd_menu != 0) {
+          switch(systemd_menu) {
+            case '2':
+              services = fs.readJsonSync(hlu_userpath+'/services.json')
+              services.push(await add_service());
+              fs.outputJsonSync(hlu_userpath+'/services.json', services, {spaces: 2});
+            case '1':
+              while (service+1 != 0) {
+                let statuses = [];
+                let status;
+                services = fs.readJsonSync(hlu_userpath+'/services.json');
+                for (let item of services) {
+                  if (item.type == 'user') {
+                    status = await quiet($`systemctl show --user -p ActiveState ${item.name} | tr -d '\\n'`);
+                  } else {
+                    status = await quiet($`systemctl show -p ActiveState ${item.name} | tr -d '\\n'`)
+                  };
+                  statuses.push(status.stdout.split('=').pop())
+                }
+                service = +await list_options({
+                  name: 'Services List',
+                  items: list_init(services, 'name'),
+                  descs: list_init(services, 'path'),
+                  values: statuses,
+                  options: ['continue']
+                })-1;
+                if (service+1 != 0) {
+                  switch(await list_options({
+                    name: services[service].name,
+                    items: ['Start','Stop','Restart','Enable','Disable','Status','Unlist'],
+                    options: ['continue']
+                  })) {
+                    case '1':
+                      if (services[service].type == 'user') {
+                        await $`systemctl start --user ${services[service].name}`;
+                      } else {
+                        await $`systemctl start ${services[service].name}`;
+                      };
+                      break;
+                    case '2':
+                      if (services[service].type == 'user') {
+                        await $`systemctl stop --user ${services[service].name}`;
+                      } else {
+                        await $`systemctl stop ${services[service].name}`;
+                      };
+                      break;
+                    case '3':
+                      if (services[service].type == 'user') {
+                        await $`systemctl restart --user ${services[service].name}`;
+                      } else {
+                        await $`systemctl restart ${services[service].name}`;
+                      };
+                      break;
+                    case '4':
+                      if (services[service].type == 'user') {
+                        await $`systemctl enable --user ${services[service].name}`;
+                      } else {
+                        await $`systemctl enable ${services[service].name}`;
+                      };
+                      break;
+                    case '5':
+                      if (services[service].type == 'user') {
+                        await $`systemctl disable --user ${services[service].name}`;
+                      } else {
+                        await $`systemctl disable ${services[service].name}`;
+                      };
+                      break;
+                    case '6':
+                      if (services[service].type == 'user') {
+                        await $`systemctl status --user ${services[service].name}`;
+                      } else {
+                        await $`systemctl status ${services[service].name}`;
+                      };
+                      break;
+                    case '7':
+                      services.splice(service, 1);
+                      fs.outputJsonSync(hlu_userpath+'/services.json', services, {spaces: 2});
+                      break;
+                  };
+                };
+              };
+              break;
+          };
+        };
+      };  
+  };
 }
