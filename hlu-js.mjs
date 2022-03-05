@@ -775,13 +775,13 @@ async function launcher_editor() {
   let launcher = await general_selector('launchers', launchers);
   switch (launcher[1].info.type) {
     case 'wine': case 'proton':
-      items = ['Change settings','Change name','Change executable','Change prefix and runner'];
+      items = ['Change settings','Change name','Change executable'];
       break;
     case 'linux':
       items = ['Change settings','Change name','Change executable'];
       break;
     case 'legendary':
-      items = ['Change settings','Change name'];
+      items = ['Change settings','Change name','Change prefix and runner'];
       break;
   };
   switch (await list_options({
@@ -835,6 +835,10 @@ async function launcher_editor() {
           break;
         case 'linux':
           launcher[1].info.exec = await exec_init(await general_input('Enter '+chalk.green('path to the')+' '+chalk.cyan('executable'), 'exec_paths'));
+          break;
+        case 'legendary':
+          launcher[1].info.prefix = await general_selector('prefixes', 'wine');
+          launcher[1].info.runner = await general_selector('runners', 'wine');
           break;
       };
       launchers.splice(launcher[0], 1);
