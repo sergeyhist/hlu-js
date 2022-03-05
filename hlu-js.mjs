@@ -775,7 +775,7 @@ async function launcher_editor() {
   let launcher = await general_selector('launchers', launchers);
   switch (launcher[1].info.type) {
     case 'wine': case 'proton':
-      items = ['Change settings','Change name','Change executable'];
+      items = ['Change settings','Change name','Change executable','Change prefix and runner'];
       break;
     case 'linux':
       items = ['Change settings','Change name','Change executable'];
