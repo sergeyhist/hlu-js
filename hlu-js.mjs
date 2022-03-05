@@ -379,7 +379,7 @@ async function exec_init(exec_path,ext) {
     "exec_paths": []
   };
   try {
-    cd(exec_path);
+    await quiet($`cd ${exec_path}`);
     if (ext) {
       if (ext.includes('wine')) {
         executables.exec_names = await globby('', {
@@ -1488,8 +1488,7 @@ async function steam_options() {
 }
 
 async function hlu_updater() {
-  cd(hlu_userpath);
-  await $`git clone https://github.com/sergeyhist/hlu-js.git`;
+  await quiet($`cd ${hlu_userpath}; git clone https://github.com/sergeyhist/hlu-js.git`);
   fs.copySync(hlu_userpath+'/hlu-js/settings.json', hlu_userpath+'/settings.json');
   fs.copySync(hlu_userpath+'/hlu-js/packages.json', hlu_userpath+'/packages.json');
   fs.removeSync(hlu_userpath+'/hlu-js');
