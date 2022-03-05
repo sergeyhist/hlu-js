@@ -45,7 +45,10 @@
       {
         "name": "Enable debug",
         "example_value": "on",
-        "value": ""
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","proton","legendary"]
+        }
       }
     ]
   },
@@ -87,7 +90,7 @@
         "example_value": "PROTON_USE_WINED3D=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -95,7 +98,7 @@
         "example_value": "PROTON_FORCE_LARGE_ADDRESS_AWARE=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -103,7 +106,7 @@
         "example_value": "PROTON_OLD_GL_STRING=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -111,7 +114,7 @@
         "example_value": "PROTON_USE_SECCOMP=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -119,7 +122,7 @@
         "example_value": "PROTON_NO_D3D12=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -127,7 +130,7 @@
         "example_value": "PROTON_NO_D3D11=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -135,7 +138,7 @@
         "example_value": "PROTON_NO_D3D10=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -143,7 +146,7 @@
         "example_value": "PROTON_NO_D3D9=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -151,7 +154,7 @@
         "example_value": "PROTON_NO_ESYNC=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -159,7 +162,7 @@
         "example_value": "PROTON_NO_FSYNC=1",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       },
       {
@@ -167,7 +170,7 @@
         "example_value": "PROTON_NO_FUTEX2=0",
         "value": "",
         "limitation": {
-          "launcher": ["proton"]
+          "launcher": ["proton","steam"]
         }
       }
     ]
@@ -180,7 +183,7 @@
         "example_value": "WINE_FULLSCREEN_FSR=1",
         "value": "",
         "limitation": {
-          "launcher": ["wine","proton","legendary"]
+          "launcher": ["wine","proton","legendary","steam"]
         }
       },
       {
@@ -189,7 +192,7 @@
         "default_value": "2",
         "value": "",
         "limitation": {
-          "launcher": ["wine","proton","legendary"]
+          "launcher": ["wine","proton","legendary","steam"]
         }
       }
     ]
@@ -315,7 +318,7 @@
         "default_value": "full",
         "value": "",
         "limitation": {
-          "launcher": ["wine","proton","legendary"]
+          "launcher": ["wine","proton","legendary","steam"]
         }
       },
       {
@@ -323,7 +326,7 @@
         "example_value": "DXVK_ASYNC=1",
         "value": "",
         "limitation": {
-          "launcher": ["wine","proton","legendary"]
+          "launcher": ["wine","proton","legendary","steam"]
         }
       },
       {
@@ -331,7 +334,7 @@
         "example_value": "DXVK_STATE_CACHE=0",
         "value": "",
         "limitation": {
-          "launcher": ["wine","proton","legendary"]
+          "launcher": ["wine","proton","legendary","steam"]
         }
       }
     ]

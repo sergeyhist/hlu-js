@@ -131,7 +131,7 @@ hlu_list_init();
 // Main
 switch (await list_options({
   name: 'Hist Linux Utilities',
-  items: ['Launcher Controller','Wine/Proton Helper','Legendary Helper','Systemd Controller']
+  items: ['Launcher Controller','Wine/Proton Helper','Legendary Helper','Systemd Controller','Launch options for steam game','Update settings and packages']
 })) {
   case '1':
     switch (await list_options({
@@ -218,6 +218,12 @@ switch (await list_options({
     break;
   case '4':
     await systemd_controller();
+    break;
+  case '5':
+    await steam_options();
+    break;
+  case '6':
+    await hlu_updater();
     break;
 };
 
@@ -570,7 +576,7 @@ async function launcher_init(type) {
       if (fs.existsSync(launcher.info.prefix+'/drive_c/users/steamuser')) {
         let user_names = [os.userInfo().username, 'steamuser'];
         launcher.info.user = user_names[+await list_options({
-          name: 'User Names (for cloud saves)',
+          name: 'User name for cloud saves',
           items: user_names
         })-1];
       } else {
@@ -926,7 +932,11 @@ async function launcher_command(launcher,settings) {
         launcher_complete = 'yes | legendary sync-saves --skip-upload --save-path "'+launcher.info.save_path+'" '+launcher.info.id+launcher_debug.replace('>','>>')+'\n'
       };
       launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
-        'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+launcher_debug.replace('>','>>')
+        'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+launcher_debug.replace('>','>>');
+      break;
+    case 'steam':
+      launcher_complete = launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' ');
+      break;
   };
   return launcher_complete;
 }
@@ -1000,7 +1010,7 @@ async function prefix_manager(type) {
       fs.outputJsonSync(hlu_userpath+'/prefixes.json', prefixes, {spaces: 2});
       switch(await general_input('Delete '+chalk.green('folder')+'? '+chalk.cyan('y|N'))) {
         case 'y': case 'Y':
-          fs.removeSync(prefix);
+          fs.emptyDirSync(prefix);
           break;
       };
       break;
@@ -1457,4 +1467,30 @@ async function systemd_controller() {
         };
       };  
   };
+}
+
+async function steam_options() {
+  let launcher_settings = [];
+  let launcher = {name: 'Steam Game', info: {type: 'steam'}};
+  let settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
+  for (let i in settings) {
+    for (let j in settings[i].settings) {
+      if (settings[i].settings[j].value != '') {
+        launcher_settings.push({
+          name: settings[i].settings[j].name,
+          value: settings[i].settings[j].value
+        });
+      };
+    };
+  };
+  let command = await launcher_command(launcher, launcher_settings);
+  console.log('Copy '+chalk.cyan('this')+' to the '+chalk.green('steam game')+' properties:\n'+chalk.cyan(command));
+}
+
+async function hlu_updater() {
+  cd(hlu_userpath);
+  await $`git clone https://github.com/sergeyhist/hlu-js.git`;
+  fs.copySync(hlu_userpath+'/hlu-js/settings.json', hlu_userpath+'/settings.json');
+  fs.copySync(hlu_userpath+'/hlu-js/packages.json', hlu_userpath+'/packages.json');
+  fs.removeSync(hlu_userpath+'/hlu-js');
 }
