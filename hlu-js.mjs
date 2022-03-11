@@ -1,11 +1,18 @@
 #!/usr/bin/env zx
 "use strict"
+$.verbose=false;
 import {spawnSync, exec} from 'child_process';
 process.on('beforeExit', async () => {
   if (hlu_flags.restart == 0) {
     await script_exit()
   };
-})
+});
+process.on('uncaughtException', async (err,origin) => {
+  console.log('\n\t'+chalk.red('Error')+'\n'+err+'\n\t'+chalk.red('Origin')+'\n'+origin+'\n');
+  if (hlu_flags.restart == 0) {
+    await script_exit()
+  };
+});
 
 // Variables
 const hlu_userpath = os.homedir+'/.local/share/Hist';
@@ -71,11 +78,12 @@ const pfx_commands_list =[
     command: 'input value'
   }
 ];
-const os_version = await quiet($`hostnamectl | grep "Operating System" | cut -d: -f2 | tr -d ' ' | tr -d '\n'`);
-const gpu_version = await quiet($`lspci | grep VGA`);
+const os_version = await $`hostnamectl | grep "Operating System" | cut -d: -f2 | tr -d ' ' | tr -d '\n'`;
+const gpu_version = await $`lspci | grep VGA`;
 const hlu_flags = {
   restart: 0
 }
+const retroarch_cores = []
 
 // Check files
 fs.ensureDirSync(hlu_packspath);
@@ -127,6 +135,7 @@ if (fs.existsSync(os.homedir+'/.steam')) {
   await steam_apps_init();
 };
 hlu_list_init();
+await retroarch_cores_init();
 
 // Main
 switch (await list_options({
@@ -141,7 +150,7 @@ switch (await list_options({
       case '1':
         switch (await list_options({
           name: "Launcher Creator",
-          items: ["Wine","Proton","Linux","Legendary"]
+          items: ["Wine","Proton","Linux","Legendary","Retroarch"]
         })) {
           case '1':
             await launcher_init('wine');
@@ -154,6 +163,9 @@ switch (await list_options({
             break;
           case '4':
             await launcher_init('legendary');
+            break;
+          case '5':
+            await launcher_init('retroarch');
             break;
         };
         break;
@@ -239,7 +251,7 @@ async function general_input(qstring,hfile,def,text) {
         input_choices.push(item)
       }
     } else {
-      await quiet($`touch ${hlu_historypath}/${hfile}`);
+      await $`touch ${hlu_historypath}/${hfile}`;
     };
     if (input_choices.length) {history_string = ' (press "'+chalk.cyan('Tab')+'" for '+chalk.green('history')+' or '+chalk.green('default')+')'};
   };
@@ -325,6 +337,12 @@ async function general_selector(type, list) {
         items: list_init(list, 'name'),
         descs: list_init(list, 'url')
       })-1].url;
+    case 'retroarch cores':
+      return retroarch_cores[+await list_options({
+        name: 'Retroarch Cores',
+        items: list_init(retroarch_cores, 'name'),
+        descs: list_init(retroarch_cores, 'path')
+      })-1].path;
   }
 }
 
@@ -372,14 +390,15 @@ function list_init(list, array) {
   return items;
 }
 
-async function exec_init(exec_path,ext) {
+async function exec_init(exec_path,ext,title) {
   let executables = {
     "all":[],
     "exec_names": [],
     "exec_paths": []
   };
+  if (!title) {title = 'Executables'};
   try {
-    await quiet($`cd ${exec_path}`);
+    cd(exec_path);
     if (ext) {
       if (ext.includes('wine')) {
         executables.exec_names = await globby('', {
@@ -411,7 +430,7 @@ async function exec_init(exec_path,ext) {
       };
     };
     return executables.exec_paths[+await list_options({
-      name: "Executables",
+      name: title,
       items: executables.exec_names,
       descs: executables.exec_paths
     })-1];
@@ -426,7 +445,7 @@ async function steam_apps_init() {
   let steam_tools = [];
   let steam_temp = '';
   if (fs.existsSync(os.homedir+'/.steam/root/steamapps/libraryfolders.vdf')) {
-    steam_temp = await quiet($`echo $(grep path ${os.homedir}/.steam/root/steamapps/libraryfolders.vdf | cut -d'"' -f4) | tr -d '\n'`);
+    steam_temp = await $`echo $(grep path ${os.homedir}/.steam/root/steamapps/libraryfolders.vdf | cut -d'"' -f4) | tr -d '\n'`;
     for (let item of steam_temp.stdout.split(' ')) {
       steam_libraries.push(item)
     };
@@ -441,11 +460,11 @@ async function steam_apps_init() {
       };
     };
     for (let item of steam_appmanifests) {
-      let steam_appid = await quiet($`echo $(grep '"appid"' ${item} | cut -d'"' -f4) | tr -d '\n'`);
-      let steam_name = await quiet($`echo $(grep '"name"' ${item} | cut -d'"' -f4) | tr -d '\n'`);
+      let steam_appid = await $`echo $(grep '"appid"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
+      let steam_name = await $`echo $(grep '"name"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
       steam_name = steam_name.stdout.replace(' \\','');
-      let steam_path = await quiet($`echo $(grep '"installdir"' ${item} | cut -d'"' -f4) | tr -d '\n'`);
-      let steam_dirname = await quiet($`dirname ${item} | tr -d '\n'`);
+      let steam_path = await $`echo $(grep '"installdir"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
+      let steam_dirname = await $`dirname ${item} | tr -d '\n'`;
       if (steam_blocklist.includes(steam_appid.stdout)) {
         steam_apps.blocklist.push({
           name: steam_name,
@@ -540,6 +559,33 @@ function hlu_list_init() {
   };
 }
 
+async function retroarch_cores_init() {
+  let cores;
+  let coreName;
+  let cores_init = async (cores_path) => {
+    if (fs.existsSync(cores_path)) {
+      cd(cores_path)
+      cores = await globby('', {
+        expandDirectories: {extensions: ['so']},
+        absolute: true
+      });
+      cores.forEach(item => {
+        for (let line of fs.readFileSync(item.replace('so','info'), {encoding: 'utf-8'}).split('\\n')) {
+          if (line.includes('display_name')) {
+            coreName = line.split('"')[1];
+          }
+        }
+        retroarch_cores.push({
+          name: coreName,
+          path: item
+        });
+      });
+    };
+  }
+  await cores_init(os.homedir+'/.config/retroarch/cores');
+  await cores_init('/usr/lib/libretro/');
+}
+
 async function launcher_init(type) {
   let launcher = {
     info: {
@@ -583,7 +629,7 @@ async function launcher_init(type) {
         launcher.info.user = os.userInfo().username;
       };
       let egs_user_info = fs.readJsonSync(os.homedir+'/.config/legendary/user.json');
-      let egs_app_info = await quiet($`legendary info ${launcher.info.id} --json`)
+      let egs_app_info = await $`legendary info ${launcher.info.id} --json`;
       egs_app_info = JSON.parse(egs_app_info.stdout);
       if (egs_app_info.game.cloud_saves_supported == true) {
         launcher.info.save_path = egs_app_info.game.cloud_save_folder
@@ -594,6 +640,11 @@ async function launcher_init(type) {
         .replace('{EpicID}', egs_user_info.client_id);
       };
       break;
+    case 'retroarch':
+      launcher.info.core = await general_selector('retroarch cores');
+      launcher.info.rom = await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('ROM')+' (Example: '+chalk.cyan('/folder/with/rom/ROM.extension')+')');
+      launcher.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('launcher'), 'launcher_names',
+        path.basename(launcher.info.rom));
   };
   settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
   for (let i in settings) {
@@ -783,6 +834,9 @@ async function launcher_editor() {
     case 'legendary':
       items = ['Change settings','Change name','Change prefix and runner'];
       break;
+    case 'retroarch':
+      items = ['Change settings','Change name'];
+      break;
   };
   switch (await list_options({
     name: 'Launcher Editor',
@@ -941,6 +995,10 @@ async function launcher_command(launcher,settings) {
     case 'steam':
       launcher_complete = launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' ');
       break;
+    case 'retroarch':
+      launcher_complete = launcher_command.pre.join(' ')+space.pre+
+        'retroarch --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug;
+      break;
   };
   return launcher_complete;
 }
@@ -957,10 +1015,10 @@ async function prefix_commands(type) {
   };
   switch (type) {
     case 'wine':
-      await $`WINEPREFIX=${prefix} ${runner} ${command}`;
+      await $`WINEPREFIX=${prefix} ${runner} ${command}`.pipe(process.stdout);
       break;
     case 'proton':
-      await $`STEAM_COMPAT_CLIENT_INSTALL_PATH=${os.homedir}/.steam/steam STEAM_COMPAT_DATA_PATH=${prefix} ${runner} run ${command}`;
+      await $`STEAM_COMPAT_CLIENT_INSTALL_PATH=${os.homedir}/.steam/steam STEAM_COMPAT_DATA_PATH=${prefix} ${runner} run ${command}`.pipe(process.stdout);
   };
 }
 
@@ -974,7 +1032,7 @@ async function prefix_winetricks(type) {
     ') (For '+chalk.green('gui')+' just '+chalk.cyan('press "Enter"')+')', 'winetricks_args');
   switch (type) {
     case 'wine':
-      await $`WINEPREFIX=${prefix} WINE=${runner} winetricks ${command}`;
+      await $`WINEPREFIX=${prefix} WINE=${runner} winetricks ${command}`.pipe(process.stdout);
       break;
   };
 }
@@ -1220,7 +1278,7 @@ async function package_installer(type, pack) {
         } else {
           status = await $`git reset --hard; git pull ${packages.git[pack].url}`;
         };
-        if (status.stdout.includes('Already up to date') && packages.git[pack].install_command) {
+        if (status.stdout.includes('Already up to date') && packages.git[pack].build_command) {
           switch(await general_input('Rebuild '+chalk.green('package')+' ? '+chalk.cyan('y|N'))) {
             case 'y': case 'Y':
               await git_build();
@@ -1257,7 +1315,7 @@ async function legendary_list(type, options) {
   let apps_list_json;
   switch(type) {
     case 'all':
-      apps_list_json = await quiet($`legendary list --json`);
+      apps_list_json = await $`legendary list --json`;
       apps_list_json = JSON.parse(apps_list_json.stdout);
       for (let item of apps_list_json) {
         apps_list.push({
@@ -1267,7 +1325,7 @@ async function legendary_list(type, options) {
       };
       break;
     case 'installed':
-      apps_list_json = await quiet($`legendary list-installed --json`);
+      apps_list_json = await $`legendary list-installed --json`;
       apps_list_json = JSON.parse(apps_list_json.stdout);
       for (let item of apps_list_json) {
         apps_list.push({
@@ -1308,40 +1366,40 @@ async function legendary_helper() {
             items: ['Sign out','Import game','Install game','Verify game','Repair game','Update game','Move game','Uninstall game','Check updates','Upload cloud saves','Fix cloud saves','Game info']
           })) {
             case '1':
-              await $`legendary auth --delete`;
+              await $`legendary auth --delete`.pipe(process.stdout);
               break;
             case '2':
-              await $`legendary import ${await legendary_list('all')} ${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}`;
+              await $`legendary import ${await legendary_list('all')} ${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}`.pipe(process.stdout);
               break;
             case '3':
-              await $`legendary install --base-path ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')} ${await legendary_list('all')}`
+              await $`legendary install --base-path ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')} ${await legendary_list('all')}`.pipe(process.stdout);
               break;
             case '4':
-              await $`legendary verify ${await legendary_list('installed')}`;
+              await $`legendary verify ${await legendary_list('installed')}`.pipe(process.stdout);
               break;
             case '5':
-              await $`legendary repair ${await legendary_list('installed')}`;
+              await $`legendary repair ${await legendary_list('installed')}`.pipe(process.stdout);
               break;
             case '6':
-              await $`legendary update ${await legendary_list('installed')}`;
+              await $`legendary update ${await legendary_list('installed')}`.pipe(process.stdout);
               break;
             case '7':
-              await $`legendary move ${await legendary_list('installed')} ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}`;
+              await $`legendary move ${await legendary_list('installed')} ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}`.pipe(process.stdout);
               break;
             case '8':
-              await $`legendary uninstall ${await legendary_list('installed')}`;
+              await $`legendary uninstall ${await legendary_list('installed')}`.pipe(process.stdout);
               break;
             case '9':
-              await $`legendary list-installed --check-updates`;
+              await $`legendary list-installed --check-updates`.pipe(process.stdout);
               break;
             case '10':
-              await $`legendary sync-saves --skip-download --disable-filters`;
+              await $`legendary sync-saves --skip-download --disable-filters`.pipe(process.stdout);
               break;
             case '11':
-              await $`legendary clean-saves`;
+              await $`legendary clean-saves`.pipe(process.stdout);
               break;
             case '12':
-              await $`legendary info ${await legendary_list('installed')}`;
+              await $`legendary info ${await legendary_list('installed')}`.pipe(process.stdout);
               break;
           };
         };
@@ -1360,9 +1418,9 @@ async function systemd_controller() {
       type: ''
     };
     service.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('service')+' (Example: '+chalk.cyan('gdm.service')+')', 'service_names');
-    let path = await quiet($`systemctl show --user -p FragmentPath ${service.name} | tr -d '\\n'`);
+    let path = await $`systemctl show --user -p FragmentPath ${service.name} | tr -d '\\n'`;
     if (path.stdout == 'FragmentPath=') {
-      path = await quiet($`systemctl show -p FragmentPath ${service.name} | tr -d '\\n'`);
+      path = await $`systemctl show -p FragmentPath ${service.name} | tr -d '\\n'`;
       service.type = 'root';
     } else {
       service.type = 'user';
@@ -1398,9 +1456,9 @@ async function systemd_controller() {
                 services = fs.readJsonSync(hlu_userpath+'/services.json');
                 for (let item of services) {
                   if (item.type == 'user') {
-                    status = await quiet($`systemctl show --user -p ActiveState ${item.name} | tr -d '\\n'`);
+                    status = await $`systemctl show --user -p ActiveState ${item.name} | tr -d '\\n'`;
                   } else {
-                    status = await quiet($`systemctl show -p ActiveState ${item.name} | tr -d '\\n'`)
+                    status = await $`systemctl show -p ActiveState ${item.name} | tr -d '\\n'`;
                   };
                   statuses.push(status.stdout.split('=').pop())
                 }
@@ -1492,7 +1550,8 @@ async function steam_options() {
 }
 
 async function hlu_updater() {
-  await quiet($`cd ${hlu_userpath}; git clone https://github.com/sergeyhist/hlu-js.git`);
+  cd(hlu_userpath);
+  await $`git clone https://github.com/sergeyhist/hlu-js.git`;
   fs.copySync(hlu_userpath+'/hlu-js/settings.json', hlu_userpath+'/settings.json');
   fs.copySync(hlu_userpath+'/hlu-js/packages.json', hlu_userpath+'/packages.json');
   fs.removeSync(hlu_userpath+'/hlu-js');

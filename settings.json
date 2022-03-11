@@ -47,7 +47,7 @@
         "example_value": "on",
         "value": "",
         "limitation": {
-          "launcher": ["wine","proton","legendary"]
+          "launcher": ["wine","proton","legendary","retroarch"]
         }
       }
     ]
@@ -66,6 +66,14 @@
       {
         "name": "Enable FSYNC",
         "example_value": "WINEFSYNC=1",
+        "value": "",
+        "limitation": {
+          "launcher": ["wine","legendary"]
+        }
+      },
+      {
+        "name": "Enable WineD3D",
+        "example_value": "WINEDLLOVERRIDES='dxgi=b;d3d9=b;d3d10core=b;d3d11=b'",
         "value": "",
         "limitation": {
           "launcher": ["wine","legendary"]
