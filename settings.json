@@ -39,7 +39,7 @@
         "example_value": "ENABLE_VKBASALT=1",
         "value": "",
         "limitation": {
-          "file": ["/usr/lib/libvkbasalt.so"]
+          "file": ["/usr/lib/libvkbasalt.so", "/opt/vkBasalt/lib/libvkbasalt.so"]
         }
       },
       {
