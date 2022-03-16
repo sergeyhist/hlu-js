@@ -6,7 +6,7 @@
 			"build_command": "./package-release.sh master dlls --no-package"
 		},
 		"VKD3D": {
-			"url": "https://github.com/HansKristian-Work/vkd3d-proton.git",
+			"url": "https://github.com/HansKristian-Work/vkd3d-proton",
 			"url_args": "--recursive",
 			"delete_folders": ["dlls"],
 			"build_command": "./package-release.sh master dlls --no-package"

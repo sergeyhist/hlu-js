@@ -1245,17 +1245,20 @@ async function package_installer(type, pack) {
       };
     };
     if (packages.git[pack].build_command) {
-      await $`eval ${packages.git[pack].build_command}`;
+      await $`eval ${packages.git[pack].build_command}`.pipe(process.stdout);
     };
   }
   let release_install = async () => {
     release = await general_selector('git releases', await git_releases(packages.release[pack].author, packages.release[pack].git_name, packages.release[pack].extension));
     cd(hlu_relpath);
+    console.log('\n'+chalk.green('Downloading...'));
     await $`wget ${release}`;
     if (packages.release[pack].flags?.includes('archive')) {
       fs.emptyDirSync(path.basename(release, '.'+packages.release[pack].extension));
+      console.log('\n'+chalk.green('Extracting...'));
       await $`tar -xf ${path.basename(release)} -C ${path.basename(release, '.'+packages.release[pack].extension)} --strip-components 1`;
       fs.removeSync(path.basename(release));
+      console.log('\n'+chalk.green('Installing...'));
       if (packages.release[pack].flags?.includes('install')) {
         packages.release[pack].folder = packages.release[pack].folder
         .replace('hlu_packspath',hlu_packspath)
@@ -1274,7 +1277,7 @@ async function package_installer(type, pack) {
         cd(hlu_packspath);
         cd(path.basename(packages.git[pack].url, '.git'));
         if (packages.git[pack].url_args) {
-          status = await $`git reset --hard; git pull ${packages.git[pack].url_args} ${packages.git[pack].url}`;
+          status = await $`git reset --hard; git submodule update ${packages.git[pack].url_args}; git pull ${packages.git[pack].url}`;
         } else {
           status = await $`git reset --hard; git pull ${packages.git[pack].url}`;
         };
