@@ -362,6 +362,12 @@ async function script_exit() {
   };
 }
 
+async function verbose_bash(command) {
+  $.verbose = true;
+  await $`eval ${command}`;
+  $.verbose = false;
+}
+
 async function git_releases(author, git_name, ext) {
   let git_objects;
   let git_result = [];
@@ -1015,10 +1021,10 @@ async function prefix_commands(type) {
   };
   switch (type) {
     case 'wine':
-      await $`WINEPREFIX=${prefix} ${runner} ${command}`.pipe(process.stdout);
+      await verbose_bash(`WINEPREFIX=${prefix} ${runner} ${command}`);
       break;
     case 'proton':
-      await $`STEAM_COMPAT_CLIENT_INSTALL_PATH=${os.homedir}/.steam/steam STEAM_COMPAT_DATA_PATH=${prefix} ${runner} run ${command}`.pipe(process.stdout);
+      await verbose_bash(`STEAM_COMPAT_CLIENT_INSTALL_PATH=${os.homedir}/.steam/steam STEAM_COMPAT_DATA_PATH=${prefix} ${runner} run ${command}`);
   };
 }
 
@@ -1032,7 +1038,7 @@ async function prefix_winetricks(type) {
     ') (For '+chalk.green('gui')+' just '+chalk.cyan('press "Enter"')+')', 'winetricks_args');
   switch (type) {
     case 'wine':
-      await $`WINEPREFIX=${prefix} WINE=${runner} winetricks ${command}`.pipe(process.stdout);
+      await verbose_bash(`WINEPREFIX=${prefix} WINE=${runner} winetricks ${command}`);
       break;
   };
 }
@@ -1245,7 +1251,7 @@ async function package_installer(type, pack) {
       };
     };
     if (packages.git[pack].build_command) {
-      await $`eval ${packages.git[pack].build_command}`.pipe(process.stdout);
+      await verbose_bash(`${packages.git[pack].build_command}`);
     };
   }
   let release_install = async () => {
@@ -1369,40 +1375,40 @@ async function legendary_helper() {
             items: ['Sign out','Import game','Install game','Verify game','Repair game','Update game','Move game','Uninstall game','Check updates','Upload cloud saves','Fix cloud saves','Game info']
           })) {
             case '1':
-              await $`legendary auth --delete`.pipe(process.stdout);
+              await verbose_bash(`legendary auth --delete`);
               break;
             case '2':
-              await $`legendary import ${await legendary_list('all')} ${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}`.pipe(process.stdout);
+              await verbose_bash(`legendary import ${await legendary_list('all')} ${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}`);
               break;
             case '3':
-              await $`legendary install --base-path ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')} ${await legendary_list('all')}`.pipe(process.stdout);
+              await verbose_bash(`legendary install --base-path ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')} ${await legendary_list('all')}`);
               break;
             case '4':
-              await $`legendary verify ${await legendary_list('installed')}`.pipe(process.stdout);
+              await verbose_bash(`legendary verify ${await legendary_list('installed')}`);
               break;
             case '5':
-              await $`legendary repair ${await legendary_list('installed')}`.pipe(process.stdout);
+              await verbose_bash(`legendary repair ${await legendary_list('installed')}`);
               break;
             case '6':
-              await $`legendary update ${await legendary_list('installed')}`.pipe(process.stdout);
+              await verbose_bash(`legendary update ${await legendary_list('installed')}`);
               break;
             case '7':
-              await $`legendary move ${await legendary_list('installed')} ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}`.pipe(process.stdout);
+              await verbose_bash(`legendary move ${await legendary_list('installed')} ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}`);
               break;
             case '8':
-              await $`legendary uninstall ${await legendary_list('installed')}`.pipe(process.stdout);
+              await verbose_bash(`legendary uninstall ${await legendary_list('installed')}`);
               break;
             case '9':
-              await $`legendary list-installed --check-updates`.pipe(process.stdout);
+              await verbose_bash(`legendary list-installed --check-updates`);
               break;
             case '10':
-              await $`legendary sync-saves --skip-download --disable-filters`.pipe(process.stdout);
+              await verbose_bash(`legendary sync-saves --skip-download --disable-filters`);
               break;
             case '11':
-              await $`legendary clean-saves`.pipe(process.stdout);
+              await verbose_bash(`legendary clean-saves`);
               break;
             case '12':
-              await $`legendary info ${await legendary_list('installed')}`.pipe(process.stdout);
+              await verbose_bash(`legendary info ${await legendary_list('installed')}`);
               break;
           };
         };
@@ -1515,9 +1521,9 @@ async function systemd_controller() {
                       break;
                     case '6':
                       if (services[service].type == 'user') {
-                        await $`systemctl status --user ${services[service].name}`;
+                        await verbose_bash(`systemctl status --user ${services[service].name}`);
                       } else {
-                        await $`systemctl status ${services[service].name}`;
+                        await verbose_bash(`systemctl status ${services[service].name}`);
                       };
                       break;
                     case '7':
