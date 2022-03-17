@@ -927,10 +927,10 @@ async function launcher_generator() {
   fs.emptyDirSync(hlu_bspath);
   for (let item of launchers) {
     fs.writeFileSync(
-      hlu_bspath+'/'+item.name.replace(/ /g,'_')+'.sh',
+      hlu_bspath+'/'+item.name+'.sh',
       '#!/bin/bash\n'+await launcher_command(item, item.settings)
     );
-    fs.chmod(hlu_bspath+'/'+item.name.replace(/ /g,'_')+'.sh', 0o755);
+    fs.chmod(hlu_bspath+'/'+item.name+'.sh', 0o755);
   };
   console.log(chalk.green('Scripts')+' been generated in the '+chalk.green(hlu_bspath)+' folder');
 }
