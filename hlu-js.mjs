@@ -568,7 +568,18 @@ function hlu_list_init() {
 async function retroarch_cores_init() {
   let cores;
   let coreName;
-  let cores_init = async (cores_path) => {
+  let name_finder = (info_path) => {
+    if (fs.existsSync(info_path)) {
+      for (let line of fs.readFileSync(info_path, {encoding: 'utf-8'}).split('\\n')) {
+        if (line.includes('display_name')) {
+          return line.split('"')[1];
+        };
+      };
+    } else {
+      return path.basename(info_path, '.info');
+    };
+  };
+  let cores_init = async (cores_path, info_path) => {
     if (fs.existsSync(cores_path)) {
       cd(cores_path)
       cores = await globby('', {
@@ -576,11 +587,11 @@ async function retroarch_cores_init() {
         absolute: true
       });
       cores.forEach(item => {
-        for (let line of fs.readFileSync(item.replace('so','info'), {encoding: 'utf-8'}).split('\\n')) {
-          if (line.includes('display_name')) {
-            coreName = line.split('"')[1];
-          }
-        }
+        if (info_path) {
+          coreName = name_finder(item.replace(cores_path, info_path).replace('.so','.info'));
+        } else {
+          coreName = name_finder(item.replace('.so','.info'));
+        };
         retroarch_cores.push({
           name: coreName,
           path: item
@@ -589,7 +600,7 @@ async function retroarch_cores_init() {
     };
   }
   await cores_init(os.homedir+'/.config/retroarch/cores');
-  await cores_init('/usr/lib/libretro/');
+  await cores_init('/usr/lib/libretro', '/usr/share/libretro/info');
 }
 
 async function launcher_init(type) {
@@ -620,30 +631,48 @@ async function launcher_init(type) {
         path.basename(launcher.info.exec));
       break;
     case 'legendary':
-      launcher.info.prefix = await general_selector('prefixes', 'wine');
-      launcher.info.runner = await general_selector('runners', 'wine');
+      let typeInit = async (type) => {
+        launcher.info.prefix = await general_selector('prefixes', type);
+        launcher.info.runner = await general_selector('runners', type);
+      };
+      switch(await list_options({
+        name: 'Runner Type',
+        items: ['Wine', 'Proton']
+      })) {
+        case '1':
+          await typeInit('wine');
+          launcher.info.runnerType = 'wine';
+          launcher.info.userPath = '/drive_c/users';
+          break;
+        case '2':
+          await typeInit('proton');
+          launcher.info.runnerType = 'proton';
+          launcher.info.userPath = '/pfx/drive_c/users';
+      };
       let egs_app = await legendary_list('installed', {full: true});
       launcher.name = egs_app.name;
       launcher.info.id = egs_app.id;
-      if (fs.existsSync(launcher.info.prefix+'/drive_c/users/steamuser')) {
+      if (fs.existsSync(launcher.info.prefix+launcher.info.userPath+'/steamuser') && launcher.info.runnerType == 'wine') {
         let user_names = [os.userInfo().username, 'steamuser'];
-        launcher.info.user = user_names[+await list_options({
+        launcher.info.userPath = launcher.info.userPath+'/'+user_names[+await list_options({
           name: 'User name for cloud saves',
           items: user_names
         })-1];
+      } else if (launcher.info.runnerType == 'proton') {
+        launcher.info.userPath = launcher.info.userPath+'/steamuser'
       } else {
-        launcher.info.user = os.userInfo().username;
+        launcher.info.userPath = launcher.info.userPath+'/'+os.userInfo().username;
       };
       let egs_user_info = fs.readJsonSync(os.homedir+'/.config/legendary/user.json');
       let egs_app_info = await $`legendary info ${launcher.info.id} --json`;
       egs_app_info = JSON.parse(egs_app_info.stdout);
       if (egs_app_info.game.cloud_saves_supported == true) {
         launcher.info.save_path = egs_app_info.game.cloud_save_folder
-        .replace('{AppData}', launcher.info.prefix+'/drive_c/users/'+launcher.info.user+'/AppData/Local')
-        .replace('{UserSavedGames}', launcher.info.prefix+'/drive_c/users/'+launcher.info.user+'/Saved Games')
-        .replace('{UserDir}', launcher.info.prefix+'/drive_c/users/'+launcher.info.user+'/Documents')
+        .replace('{AppData}', launcher.info.prefix+launcher.info.userPath+'/AppData/Local')
+        .replace('{UserSavedGames}', launcher.info.prefix+launcher.info.userPath+'/Saved Games')
+        .replace('{UserDir}', launcher.info.prefix+launcher.info.userPath+'/Documents')
         .replace('{InstallDir}', egs_app_info.install.install_path)
-        .replace('{EpicID}', egs_user_info.client_id);
+        .replace('{EpicID}', egs_user_info.account_id);
       };
       break;
     case 'retroarch':
@@ -721,7 +750,7 @@ async function settings_init(launcher, settings) {
               console.log('\n'+chalk.green(selected_setting.limitation.file)+chalk.red(' not installed!'));
             };
           } else if (selected_setting.limitation?.launcher) {
-            if (selected_setting.limitation.launcher.includes(launcher.info.type)) {
+            if (selected_setting.limitation.launcher.includes(launcher.info.type) || selected_setting.limitation.launcher.includes(launcher.info.runnerType)) {
               limit_flag = 1;
             } else {
               console.log('\n'+'Only for '+chalk.green(selected_setting.limitation.launcher.join(',')));
@@ -838,7 +867,7 @@ async function launcher_editor() {
       items = ['Change settings','Change name','Change executable'];
       break;
     case 'legendary':
-      items = ['Change settings','Change name','Change prefix and runner'];
+      items = ['Change settings','Change name'];
       break;
     case 'retroarch':
       items = ['Change settings','Change name'];
@@ -895,10 +924,6 @@ async function launcher_editor() {
           break;
         case 'linux':
           launcher[1].info.exec = await exec_init(await general_input('Enter '+chalk.green('path to the')+' '+chalk.cyan('executable'), 'exec_paths'));
-          break;
-        case 'legendary':
-          launcher[1].info.prefix = await general_selector('prefixes', 'wine');
-          launcher[1].info.runner = await general_selector('runners', 'wine');
           break;
       };
       launchers.splice(launcher[0], 1);
@@ -995,8 +1020,16 @@ async function launcher_command(launcher,settings) {
       if (launcher.info.save_path) {
         launcher_complete = 'yes | legendary sync-saves --skip-upload --save-path "'+launcher.info.save_path+'" '+launcher.info.id+launcher_debug.replace('>','>>')+'\n'
       };
-      launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
-        'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+launcher_debug.replace('>','>>');
+      if (launcher.info.runnerType == 'wine') {
+        launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
+          launcher_command.pre.join(' ')+space.pre+'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+
+          launcher.info.prefix+'" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
+      } else {
+        launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
+          launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+
+          launcher.info.prefix+'" legendary launch --no-wine --wrapper "'+launcher.info.runner+' run" '+
+          launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
+      };
       break;
     case 'steam':
       launcher_complete = launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' ');
@@ -1021,10 +1054,10 @@ async function prefix_commands(type) {
   };
   switch (type) {
     case 'wine':
-      await verbose_bash(`WINEPREFIX=${prefix} ${runner} ${command}`);
+      await verbose_bash(`WINEPREFIX="${prefix}" "${runner}" ${command}`);
       break;
     case 'proton':
-      await verbose_bash(`STEAM_COMPAT_CLIENT_INSTALL_PATH=${os.homedir}/.steam/steam STEAM_COMPAT_DATA_PATH=${prefix} ${runner} run ${command}`);
+      await verbose_bash(`STEAM_COMPAT_CLIENT_INSTALL_PATH="${os.homedir}/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}" "${runner}" run ${command}`);
   };
 }
 
@@ -1038,7 +1071,7 @@ async function prefix_winetricks(type) {
     ') (For '+chalk.green('gui')+' just '+chalk.cyan('press "Enter"')+')', 'winetricks_args');
   switch (type) {
     case 'wine':
-      await verbose_bash(`WINEPREFIX=${prefix} WINE=${runner} winetricks ${command}`);
+      await verbose_bash(`WINEPREFIX="${prefix}" WINE="${runner}" winetricks ${command}`);
       break;
   };
 }
@@ -1378,10 +1411,10 @@ async function legendary_helper() {
               await verbose_bash(`legendary auth --delete`);
               break;
             case '2':
-              await verbose_bash(`legendary import ${await legendary_list('all')} ${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}`);
+              await verbose_bash(`legendary import ${await legendary_list('all')} "${await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('game'), 'legendary_paths')}"`);
               break;
             case '3':
-              await verbose_bash(`legendary install --base-path ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')} ${await legendary_list('all')}`);
+              await verbose_bash(`legendary install --base-path "${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be installed', 'legendary_paths')}" ${await legendary_list('all')}`);
               break;
             case '4':
               await verbose_bash(`legendary verify ${await legendary_list('installed')}`);
@@ -1393,7 +1426,7 @@ async function legendary_helper() {
               await verbose_bash(`legendary update ${await legendary_list('installed')}`);
               break;
             case '7':
-              await verbose_bash(`legendary move ${await legendary_list('installed')} ${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}`);
+              await verbose_bash(`legendary move ${await legendary_list('installed')} "${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('game')+' will be moved', 'legendary_paths')}"`);
               break;
             case '8':
               await verbose_bash(`legendary uninstall ${await legendary_list('installed')}`);
