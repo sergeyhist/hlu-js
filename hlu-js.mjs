@@ -363,9 +363,7 @@ async function script_exit() {
 }
 
 async function verbose_bash(command) {
-  $.verbose = true;
-  await $`eval ${command}`;
-  $.verbose = false;
+  await $`eval ${command}`.pipe(process.stdout);
 }
 
 async function git_releases(author, git_name, ext) {
@@ -1027,7 +1025,7 @@ async function launcher_command(launcher,settings) {
       } else {
         launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
           launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+
-          launcher.info.prefix+'" legendary launch --no-wine --wrapper "'+launcher.info.runner+' run" '+
+          launcher.info.prefix+'" legendary launch --no-wine --wrapper "\''+launcher.info.runner+'\' run" '+
           launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
       };
       break;
