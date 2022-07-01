@@ -27,11 +27,6 @@
         }
       },
       {
-        "name": "Enable gamescope",
-        "example_value": "gamescope -b -U -h 720 -H 1080",
-        "value": ""
-      },
-      {
         "name": "Enable mangohud",
         "example_value": "mangohud",
         "value": "",

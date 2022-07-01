@@ -1024,8 +1024,8 @@ async function launcher_command(launcher,settings) {
           launcher.info.prefix+'" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
       } else {
         launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
-          launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+
-          launcher.info.prefix+'" legendary launch --no-wine --wrapper "\''+launcher.info.runner+'\' run" '+
+          'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+
+          launcher.info.prefix+'" legendary launch --no-wine --wrapper "'+launcher_command.pre.join(' ')+space.pre+'\''+launcher.info.runner+'\' run" '+
           launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
       };
       break;
