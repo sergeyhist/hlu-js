@@ -130,16 +130,17 @@ if (!fs.existsSync(hlu_userpath+'/runners.json')) {
   });
 };
 
-// Init const variables
-if (fs.existsSync(os.homedir+'/.steam')) {
-  await steam_apps_init();
-};
-hlu_list_init();
-await retroarch_cores_init();
-
-// Main
+//Arguments
 if (process.argv[3] == 'run') {await launcher_runner()}
 else {
+  // Init const variables
+  if (fs.existsSync(os.homedir+'/.steam')) {
+    await steam_apps_init();
+  };
+  hlu_list_init();
+  await retroarch_cores_init();
+
+  // Main
   switch (await list_options({
     name: 'Hist Linux Utilities',
     items: ['Launcher Controller','Wine/Proton Helper','Legendary Helper','Systemd Controller','Launch options for steam game','Update settings and packages']
@@ -1397,7 +1398,7 @@ async function legendary_helper() {
       case false:
         switch(await general_input(chalk.green('Sign in')+' ? '+chalk.cyan('y|N'))) {
           case 'y': case 'Y':
-            await $`legendary auth`;
+            await verbose_bash(`legendary auth`);
           default:
             break;
         };
@@ -1588,7 +1589,8 @@ async function steam_options() {
     };
   };
   let command = await launcher_command(launcher, launcher_settings);
-  console.log('Copy '+chalk.cyan('this')+' to the '+chalk.green('steam game')+' properties:\n'+chalk.cyan(command));
+  console.log('Paste '+chalk.cyan('this')+' to the '+chalk.green('steam game')+' properties:\n'+chalk.cyan(command));
+  $`echo ${command} | xclip -sel clip`;
 }
 
 async function hlu_updater() {
