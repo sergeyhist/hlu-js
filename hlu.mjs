@@ -143,7 +143,7 @@ else {
   // Main
   switch (await list_options({
     name: 'Hist Linux Utilities',
-    items: ['Launcher Controller','Wine/Proton Helper','Legendary Helper','Systemd Controller','Launch options for steam game','Update settings and packages']
+    items: ['Launcher Controller','Wine/Proton Helper','Legendary Helper','Systemd Controller','Launch options for steam game','Install Luxtorpeda','Update settings and packages']
   })) {
     case '1':
       switch (await list_options({
@@ -238,6 +238,9 @@ else {
       await steam_options();
       break;
     case '6':
+      await package_installer('release', 'Luxtorpeda');
+      break;
+    case '7':
       await hlu_updater();
       break;
   };
