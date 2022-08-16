@@ -44,6 +44,13 @@
 			"extension": "tar.xz",
 			"flags": ["archive","install"],
 			"folder": "hlu_packspath/GE-Wine"
-		}
+		},
+        "Luxtorpeda": {
+          "author": "luxtorpeda-dev",
+          "git_name": "luxtorpeda",
+          "extension": "tar.xz",
+          "flags": ["archive", "install"],
+          "folder": "home_dir/.steam/root/compatibilitytools.d/Luxtorpeda"
+        }
 	}
 }
