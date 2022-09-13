@@ -369,7 +369,9 @@ async function script_exit() {
 }
 
 async function verbose_bash(command) {
-  await $`eval ${command}`.pipe(process.stdout);
+  $.verbose = true;
+  await $`eval ${command}`;
+  $.verbose = false;
 }
 
 async function git_releases(author, git_name, ext) {
@@ -1295,13 +1297,13 @@ async function package_installer(type, pack) {
     release = await general_selector('git releases', await git_releases(packages.release[pack].author, packages.release[pack].git_name, packages.release[pack].extension));
     cd(hlu_relpath);
     console.log('\n'+chalk.green('Downloading...'));
-    await $`wget ${release}`;
+    await verbose_bash(`wget ${release}`);
     if (packages.release[pack].flags?.includes('archive')) {
       fs.emptyDirSync(path.basename(release, '.'+packages.release[pack].extension));
       console.log('\n'+chalk.green('Extracting...'));
       await $`tar -xf ${path.basename(release)} -C ${path.basename(release, '.'+packages.release[pack].extension)} --strip-components 1`;
       fs.removeSync(path.basename(release));
-      console.log('\n'+chalk.green('Installing...'));
+      console.log('\n'+chalk.green('Installing...')+'\n');
       if (packages.release[pack].flags?.includes('install')) {
         packages.release[pack].folder = packages.release[pack].folder
         .replace('hlu_packspath',hlu_packspath)
