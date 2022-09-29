@@ -612,7 +612,7 @@ async function retroarch_cores_init() {
 async function launcher_init(type) {
   let launcher = {
     info: {
-      type: type,
+      type: type
     }
   };
   let settings;
@@ -687,6 +687,7 @@ async function launcher_init(type) {
       launcher.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('launcher'), 'launcher_names',
         path.basename(launcher.info.rom));
   };
+  launcher.info.category = await general_input('Enter '+chalk.cyan('category')+' of the '+chalk.green('launcher')+' (Example: '+chalk.cyan('Emulator')+')');
   settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
   for (let i in settings) {
     for (let j in settings[i].settings) {
@@ -957,11 +958,12 @@ async function launcher_generator() {
   let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
   fs.emptyDirSync(hlu_bspath);
   for (let item of launchers) {
+    fs.ensureDirSync(hlu_bspath+'/'+item.info.category);
     fs.writeFileSync(
-      hlu_bspath+'/'+item.name+'.sh',
+      hlu_bspath+'/'+item.info.category+'/'+item.name+'.sh',
       '#!/bin/bash\n'+await launcher_command(item, item.settings)
     );
-    fs.chmod(hlu_bspath+'/'+item.name+'.sh', 0o755);
+    fs.chmod(hlu_bspath+'/'+item.info.category+'/'+item.name+'.sh', 0o755);
   };
   console.log(chalk.green('Scripts')+' been generated in the '+chalk.green(hlu_bspath)+' folder');
 }
