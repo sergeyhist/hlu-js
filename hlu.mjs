@@ -671,13 +671,21 @@ async function launcher_init(type) {
       };
       let egs_user_info = fs.readJsonSync(os.homedir+'/.config/legendary/user.json');
       let egs_app_info = await $`legendary info ${launcher.info.id} --json`;
+      let egs_eos_info = await $`legendary eos-overlay info`;
+      if (! egs_eos_info.stderr.includes('No Legendary-managed installation found')) {
+        switch(await general_input('Install '+chalk.green('EOS-Overlay')+'? '+chalk.cyan('y|N'))) {
+          case 'y': case 'Y':
+            launcher.info.runnerType == 'wine' ? await verbose_bash(`legendary eos-overlay enable --prefix "${launcher.info.prefix}"`) : await verbose_bash(`legendary eos-overlay enable --prefix "${launcher.info.prefix}/pfx"`);
+            break;
+        };
+      };
       egs_app_info = JSON.parse(egs_app_info.stdout);
       if (egs_app_info.game.cloud_saves_supported == true) {
         launcher.info.save_path = egs_app_info.game.cloud_save_folder
         .replace('{AppData}', launcher.info.prefix+launcher.info.userPath+'/AppData/Local')
         .replace('{UserSavedGames}', launcher.info.prefix+launcher.info.userPath+'/Saved Games')
         .replace('{UserDir}', launcher.info.prefix+launcher.info.userPath+'/Documents')
-        .replace('{InstallDir}', egs_app_info.install.install_path)
+        .replace('{InstallDir}', egs_app_info.install?.install_path)
         .replace('{EpicID}', egs_user_info.account_id);
       };
       break;
@@ -687,7 +695,8 @@ async function launcher_init(type) {
       launcher.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('launcher'), 'launcher_names',
         path.basename(launcher.info.rom));
   };
-  launcher.info.category = await general_input('Enter '+chalk.cyan('category')+' of the '+chalk.green('launcher')+' (Example: '+chalk.cyan('Emulator')+')');
+  launcher.info.category = await general_input('Enter '+chalk.cyan('category')+' of the '+chalk.green('launcher')+' (Default: '+chalk.cyan('General')+')', 'launcher_categories');
+  if (! launcher.info.category) {launcher.info.category = 'General'}; 
   settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
   for (let i in settings) {
     for (let j in settings[i].settings) {
@@ -950,19 +959,19 @@ async function launcher_editor() {
 async function launcher_runner() {
   let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
   let launcher = await general_selector('launchers', launchers)
-  let command = await launcher_command(launcher[1], launcher[1].settings);
-  exec(command);
+  let commands = await launcher_command(launcher[1], launcher[1].settings);
+  for (let command of commands) {
+    await verbose_bash(command);
+  };
 }
 
 async function launcher_generator() {
   let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
   fs.emptyDirSync(hlu_bspath);
   for (let item of launchers) {
+    let commands = await launcher_command(item, item.settings);
     fs.ensureDirSync(hlu_bspath+'/'+item.info.category);
-    fs.writeFileSync(
-      hlu_bspath+'/'+item.info.category+'/'+item.name+'.sh',
-      '#!/bin/bash\n'+await launcher_command(item, item.settings)
-    );
+    fs.writeFileSync( hlu_bspath+'/'+item.info.category+'/'+item.name+'.sh', '#!/bin/bash\n'+commands.join('\n'));
     fs.chmod(hlu_bspath+'/'+item.info.category+'/'+item.name+'.sh', 0o755);
   };
   console.log(chalk.green('Scripts')+' been generated in the '+chalk.green(hlu_bspath)+' folder');
@@ -982,7 +991,7 @@ async function launcher_info() {
 }
 
 async function launcher_command(launcher,settings) {
-  let launcher_complete = '';
+  let launcher_complete = [];
   let launcher_debug = ' &> /dev/null'
   let launcher_command = {
     pre: [],
@@ -1011,40 +1020,33 @@ async function launcher_command(launcher,settings) {
   if (launcher_command.post.length > 0) {space.post = ' '};
   switch (launcher.info.type) {
     case 'wine':
-      launcher_complete = 'cd "'+path.dirname(launcher.info.exec)+'"\n'+launcher_command.pre.join(' ')+space.pre+
-        'WINEPREFIX="'+launcher.info.prefix+'" "'+launcher.info.runner+'" '+launcher_command.mid.join(' ')+space.mid+'"'+
-        launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug;
+      launcher_complete.push('cd "'+path.dirname(launcher.info.exec));
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'WINEPREFIX="'+launcher.info.prefix+'" "'+launcher.info.runner+'" '+launcher_command.mid.join(' ')+space.mid+'"'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
     case 'proton':
-      launcher_complete = 'cd "'+path.dirname(launcher.info.exec)+'"\n'+launcher_command.pre.join(' ')+space.pre+
-        'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+
-        launcher.info.prefix+'" "'+launcher.info.runner+'" run "'+
-        launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug;
+      launcher_complete.push('cd "'+path.dirname(launcher.info.exec));
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" "'+launcher.info.runner+'" run "'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
     case 'linux':
-      launcher_complete = launcher_command.pre.join(' ')+space.pre+'"'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug;
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'"'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
     case 'legendary':
       if (launcher.info.save_path) {
-        launcher_complete = 'yes | legendary sync-saves --skip-upload --save-path "'+launcher.info.save_path+'" '+launcher.info.id+launcher_debug.replace('>','>>')+'\n'
+        launcher_complete.push('legendary sync-saves -y --skip-upload --save-path "'+launcher.info.save_path+'" '+launcher.info.id+launcher_debug);
       };
       if (launcher.info.runnerType == 'wine') {
-        launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
-          launcher_command.pre.join(' ')+space.pre+'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+
-          launcher.info.prefix+'" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
+        launcher_complete.push('legendary update -y --update-only '+launcher.info.id+launcher_debug.replace('>','>>'));
+        launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
       } else {
-        launcher_complete = 'yes | legendary update --update-only '+launcher.info.id+launcher_debug+'\n'+launcher_complete+
-          'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+
-          launcher.info.prefix+'" legendary launch --no-wine --wrapper "'+launcher_command.pre.join(' ')+space.pre+'\''+launcher.info.runner+'\' run" '+
-          launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>');
+        launcher_complete.push('legendary update -y --update-only '+launcher.info.id+launcher_debug.replace('>','>>'));
+        launcher_complete.push('STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" legendary launch --no-wine --wrapper "'+launcher_command.pre.join(' ')+space.pre+'\''+launcher.info.runner+'\' run" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
       };
       break;
     case 'steam':
-      launcher_complete = launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' ');
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' '));
       break;
     case 'retroarch':
-      launcher_complete = launcher_command.pre.join(' ')+space.pre+
-        'retroarch --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug;
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'retroarch --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
   };
   return launcher_complete;
@@ -1413,7 +1415,7 @@ async function legendary_helper() {
         if (fs.existsSync(os.homedir+'/.config/legendary/user.json')) {
           switch(await list_options({
             name: 'Legendary Helper',
-            items: ['Sign out','Import game','Install game','Verify game','Repair game','Update game','Move game','Uninstall game','Check updates','Upload cloud saves','Fix cloud saves','Game info']
+            items: ['Sign out','Import game','Install game','Verify game','Repair game','Update game','Move game','Uninstall game','Check updates','Upload cloud saves','Fix cloud saves','Game info','Install EOS-Overlay','Update EOS-Overlay','Remove EOS-Overlay']
           })) {
             case '1':
               await verbose_bash(`legendary auth --delete`);
@@ -1446,10 +1448,19 @@ async function legendary_helper() {
               await verbose_bash(`legendary sync-saves --skip-download --disable-filters`);
               break;
             case '11':
-              await verbose_bash(`legendary clean-saves`);
+              await verbose_bash(`legendary clean-saves --delete-incomplete`);
               break;
             case '12':
               await verbose_bash(`legendary info ${await legendary_list('installed')}`);
+              break;
+            case '13':
+              await verbose_bash(`legendary eos-overlay install --path "${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('eos-overlay')+' will be installed', 'legendary_paths')}/.overlay"`);
+              break;
+            case '14':
+              await verbose_bash(`legendary eos-overlay update`);
+              break;
+            case '15':
+              await verbose_bash(`legendary eos-overlay remove`);
               break;
           };
         };
