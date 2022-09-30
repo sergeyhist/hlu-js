@@ -1020,11 +1020,11 @@ async function launcher_command(launcher,settings) {
   if (launcher_command.post.length > 0) {space.post = ' '};
   switch (launcher.info.type) {
     case 'wine':
-      launcher_complete.push('cd "'+path.dirname(launcher.info.exec));
+      launcher_complete.push('cd "'+path.dirname(launcher.info.exec)+'"');
       launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'WINEPREFIX="'+launcher.info.prefix+'" "'+launcher.info.runner+'" '+launcher_command.mid.join(' ')+space.mid+'"'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
     case 'proton':
-      launcher_complete.push('cd "'+path.dirname(launcher.info.exec));
+      launcher_complete.push('cd "'+path.dirname(launcher.info.exec)+'"');
       launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" "'+launcher.info.runner+'" run "'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
     case 'linux':
