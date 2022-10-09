@@ -247,6 +247,12 @@ else {
 };
 
 //Functions
+function readLaunchers() {
+  return fs.readJsonSync(hlu_userpath+'/launchers.json').slice(0).sort((a,b) => {
+    return a.name.localeCompare(b.name);
+  });
+}
+
 async function general_input(qstring,hfile,def,text) {
   let input_choices = [];
   let history_string = '';
@@ -358,7 +364,7 @@ async function script_exit() {
       hlu_flags.restart = 1;
       spawnSync(process.argv.shift(),process.argv,{
         "cwd":process.cwd(),
-        "detached":true,
+        "detached":false,
         "stdio":"inherit"
       });
     case 'n': case 'N': case '': case ' ':
@@ -872,7 +878,7 @@ async function settings_init(launcher, settings) {
 async function launcher_editor() {
   let launcher_settings = [];
   let items = [];
-  let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
+  let launchers = readLaunchers();
   let settings = fs.readJsonSync(hlu_userpath+'/settings.json');
   let launcher = await general_selector('launchers', launchers);
   switch (launcher[1].info.type) {
@@ -957,7 +963,7 @@ async function launcher_editor() {
 }
 
 async function launcher_runner() {
-  let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
+  let launchers = readLaunchers();
   let launcher = await general_selector('launchers', launchers)
   let commands = await launcher_command(launcher[1], launcher[1].settings);
   for (let command of commands) {
@@ -966,7 +972,7 @@ async function launcher_runner() {
 }
 
 async function launcher_generator() {
-  let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
+  let launchers = readLaunchers();
   fs.emptyDirSync(hlu_bspath);
   for (let item of launchers) {
     let commands = await launcher_command(item, item.settings);
@@ -978,14 +984,14 @@ async function launcher_generator() {
 }
 
 async function launcher_remover() {
-  let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
+  let launchers = readLaunchers();
   let launcher = await general_selector('launchers', launchers);
   launchers.splice(launcher[0],1);
   fs.outputJsonSync(hlu_userpath+'/launchers.json', launchers, {spaces: 2});
 }
 
 async function launcher_info() {
-  let launchers = fs.readJsonSync(hlu_userpath+'/launchers.json');
+  let launchers = readLaunchers();
   let launcher = await general_selector('launchers', launchers);
   console.log(launcher[1]);
 }
@@ -1105,6 +1111,7 @@ async function prefix_manager(type) {
   })) {
     case '1':
       prefix = await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('prefix'), 'pfx_paths');
+      fs.ensureDirSync(prefix);
       prefixes[type].push({
         name: await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('prefix'), 'pfx_names', path.basename(prefix)),
         path: prefix
