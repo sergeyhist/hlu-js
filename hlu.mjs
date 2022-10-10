@@ -966,9 +966,7 @@ async function launcher_runner() {
   let launchers = readLaunchers();
   let launcher = await general_selector('launchers', launchers)
   let commands = await launcher_command(launcher[1], launcher[1].settings);
-  for (let command of commands) {
-    await verbose_bash(command);
-  };
+  await verbose_bash(commands.join('; '));
 }
 
 async function launcher_generator() {
