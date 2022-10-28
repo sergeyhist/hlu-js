@@ -1,7 +1,8 @@
 #!/usr/bin/env zx
 "use strict"
 $.verbose=false;
-import {spawnSync, exec} from 'child_process';
+import {spawnSync} from 'child_process';
+import {workerData} from 'worker_threads';
 process.on('beforeExit', async () => {
   if (hlu_flags.restart == 0) {
     await script_exit()
@@ -78,7 +79,6 @@ const pfx_commands_list =[
     command: 'input value'
   }
 ];
-const os_version = await $`hostnamectl | grep "Operating System" | cut -d: -f2 | tr -d ' ' | tr -d '\n'`;
 const gpu_version = await $`lspci | grep VGA`;
 const hlu_flags = {
   restart: 0
@@ -403,7 +403,7 @@ async function git_releases(author, git_name, ext) {
 function list_init(list, array) {
   let items = [];
   for (let item of list) {
-    items.push(item[array])
+    items.push(item[array] ? item[array] : '')
   };
   return items;
 }
@@ -706,7 +706,7 @@ async function launcher_init(type) {
   settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
   for (let i in settings) {
     for (let j in settings[i].settings) {
-      if (settings[i].settings[j].value != '') {
+      if (settings[i].settings[j].value) {
         launcher_settings.push({
           name: settings[i].settings[j].name,
           value: settings[i].settings[j].value
@@ -788,71 +788,12 @@ async function settings_init(launcher, settings) {
           };
           if (limit_flag == 1) {
             if (selected_setting.example_value.includes('input_value')) {
-              let input_text;
-              let additional_text;
-              switch (selected_setting.name) {
-                case 'Add arguments':
-                  input_text = 'Enter '+chalk.cyan('arguments')+' (Example: '+chalk.cyan('-windowed')+')';
-                  break;
-                case 'Add variables or commands':
-                  input_text = 'Enter '+chalk.cyan('variables')+' or '+chalk.cyan('commands')+' (Example: '+chalk.cyan('gamemoderun')+' or '+chalk.cyan('WINEESYNC=1')+')';
-                  break;
-                case 'Enable pulse audio latency':
-                  input_text = 'Enter '+chalk.cyan('pulse audio')+chalk.cyan('latency')+' (Example: '+chalk.cyan('90')+')';
-                  break;
-                case 'Enable pulse audio latency':
-                  input_text = 'Enter '+chalk.cyan('pulse audio')+chalk.cyan('latency')+' (Example: '+chalk.cyan('90')+')';
-                  break;
-                case 'Enable virtual desktop':
-                  input_text = 'Enter '+chalk.cyan('width')+' and '+chalk.cyan('height')+' of '+chalk.green('virtual desktop')+' (Example: '+chalk.cyan('1600x900')+')';
-                  break;
-                case 'Set Wine FSR strength':
-                  input_text = 'Enter '+chalk.green('FSR strength')+chalk.cyan(' value ')+'('+chalk.cyan('0')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('5')+')';
-                  break;
-                case 'Set max framerate':
-                  input_text = 'Enter '+chalk.cyan('maximum framerate');
-                  break;
-                case 'Set max framerate for battery power':
-                  input_text = 'Enter '+chalk.cyan('maximum framerate')+' when running on '+chalk.green('battery power');
-                  break;
-                case 'Enable Vsync':
-                  additional_text = '\n\t'+chalk.green('OpenGL')+'\n'+
-                  chalk.cyan(' -1')+' - Adaptive sync (unconfirmed if this actually works)\n'+
-                  chalk.cyan(' 0')+' - Force off\n'+
-                  chalk.cyan(' 1')+' - Force on\n'+
-                  chalk.cyan(' n')+' - Sync to refresh rate / n\n'+
-                  '\t'+chalk.green('Vulkan')+'\n'+
-                  chalk.cyan(' 0')+' - Force off\n'+
-                  chalk.cyan(' 1')+' - Mailbox mode. Vsync with uncapped framerate\n'+
-                  chalk.cyan(' 2')+' - Traditional vsync with framerate capped to refresh rate\n'+
-                  chalk.cyan(' 3')+' - Adaptive vsync with tearing at low framerates\n';
-                  input_text = 'Enter '+chalk.green('Vsync ')+chalk.cyan('value');
-                  break;
-                case 'Set mip-map LoD bias':
-                  input_text = 'Enter '+chalk.green('mip-map LoD bias')+chalk.cyan(' value ')+'('+chalk.cyan('-16')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('16')+')';
-                  break;
-                case 'Set anisotropic filtering level (Vulkan only)':
-                  input_text = 'Enter '+chalk.green('anisotropic filtering')+chalk.cyan(' value ')+'('+chalk.cyan('1')+' <= '+chalk.cyan('value')+' <= '+chalk.cyan('16')+')';
-                  break;
-                case 'Enable DxvkHUD':
-                  additional_text = '\n'+chalk.cyan(' devinfo')+' - Displays the name of the GPU and the driver version\n'+
-                  chalk.cyan(' fps')+' - Shows the current frame rate\n'+
-                  chalk.cyan(' frametimes')+' - Shows a frame time graph\n'+
-                  chalk.cyan(' submissions')+' - Shows the number of command buffers submitted per frame\n'+
-                  chalk.cyan(' drawcalls')+' - Shows the number of draw calls and render passes per frame\n'+
-                  chalk.cyan(' pipelines')+' - Shows the total number of graphics and compute pipelines\n'+
-                  chalk.cyan(' memory')+' - Shows the amount of device memory allocated and used\n'+
-                  chalk.cyan(' gpuload')+' - Shows estimated GPU load. May be inaccurate\n'+
-                  chalk.cyan(' version')+' - Shows DXVK version\n'+
-                  chalk.cyan(' api')+' - Shows the D3D feature level used by the application\n'+
-                  chalk.cyan(' compiler')+' - Shows shader compiler activity\n'+
-                  chalk.cyan(' samplers')+' - Shows the current number of sampler pairs used [D3D9 Only]\n'+
-                  chalk.cyan(' scale=value')+' - Scales the HUD by a factor of x (e.g. 1.5)\n'+
-                  chalk.cyan(' full')+' - Enable all options\n';
-                  input_text = 'Enter '+chalk.green('DxvkHUD ')+chalk.cyan('options')+' (Example: '+chalk.cyan('fps,frametimes,scale=0.8')+')';
-                  break;
+              let colors = {
+                cyan: '\x1B[36m',
+                green: '\x1B[32m',
+                zero: '\x1B[0m'
               }
-              setting_input = await general_input(input_text, selected_setting.name.replace(/ /g,'_'), selected_setting.default_value, additional_text);
+              setting_input = await general_input(selected_setting.text?.replace(/cyan_/g, colors.cyan).replace(/green_/g, colors.green).replace(/_end/g, colors.zero), selected_setting.name.replace(/ /g,'_'), selected_setting.default_value, selected_setting.additionalText?.replace(/cyan_/g, colors.cyan).replace(/green_/g, colors.green).replace(/_end/g, colors.zero));
               if (setting_input != '') {
                 settings[+setting_menu-1].settings[+setting_item-1].value = selected_setting.example_value
                   .replace('input_value', setting_input)
@@ -861,7 +802,7 @@ async function settings_init(launcher, settings) {
                 settings[+setting_menu-1].settings[+setting_item-1].value = '';
               };
             } else {
-              if (settings[+setting_menu-1].settings[+setting_item-1].value == '') {
+              if (!settings[+setting_menu-1].settings[+setting_item-1].value) {
                 settings[+setting_menu-1].settings[+setting_item-1].value = selected_setting.example_value;
               } else {
                 settings[+setting_menu-1].settings[+setting_item-1].value = '';
@@ -913,7 +854,7 @@ async function launcher_editor() {
       settings = await settings_init(launcher, settings)
       for (let i in settings) {
         for (let j in settings[i].settings) {
-          if (settings[i].settings[j].value != '') {
+          if (settings[i].settings[j].value) {
             launcher_settings.push({
               name: settings[i].settings[j].name,
               value: settings[i].settings[j].value
@@ -1008,16 +949,19 @@ async function launcher_command(launcher,settings) {
     post: ''
   };
   if (settings) {
+    let gamescope;
     for (let i in settings) {
       if (settings[i].value != '') {
         switch (settings[i].name) {
           case 'Enable virtual desktop': launcher_command.mid.push(settings[i].value); break;
           case 'Add arguments': launcher_command.post.push(settings[i].value); break;
           case 'Enable debug': launcher_debug = ' &> "'+hlu_logspath+'/'+launcher.name.replace(/ /g,'_')+'.log"'; break;
+          case 'Enable gamescope': gamescope = settings[i].value; break;
           default: launcher_command.pre.push(settings[i].value)
         };
       };
     };
+    gamescope && launcher_command.pre.push(gamescope);
   };
   if (launcher_command.pre.length > 0) {space.pre = ' '};
   if (launcher_command.mid.length > 0) {space.mid = ' '};
@@ -1043,7 +987,7 @@ async function launcher_command(launcher,settings) {
         launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
       } else {
         launcher_complete.push('legendary update -y --update-only '+launcher.info.id+launcher_debug.replace('>','>>'));
-        launcher_complete.push('STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" legendary launch --no-wine --wrapper "'+launcher_command.pre.join(' ')+space.pre+'\''+launcher.info.runner+'\' run" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
+        launcher_complete.push('STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" '+launcher_command.pre.join(' ')+space.pre+'legendary launch --no-wine --wrapper "'+'\''+launcher.info.runner+'\' run" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
       };
       break;
     case 'steam':

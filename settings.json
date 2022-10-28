@@ -5,23 +5,22 @@
       {
         "name": "Add arguments",
         "example_value": "input_value",
-        "value": ""
+        "text": "Enter cyan_arguments_end (Example: cyan_-windowed_end)"
       },
       {
         "name": "Add variables or commands",
         "example_value": "input_value",
-        "value": ""
+        "text": "Enter cyan_variables or cyan_commands_end (Example: cyan_gamemoderun or cyan_WINEESYNC=1_end"
       },
       {
         "name": "Enable pulse audio latency",
         "example_value": "PULSE_LATENCY_MSEC=input_value",
         "default_value": "60",
-        "value": ""
+        "text": "Enter cyan_pulseaudio latency_end (Example: cyan_90_end)"
       },
       {
         "name": "Enable gamemode",
         "example_value": "gamemoderun",
-        "value": "",
         "limitation": {
           "file": ["/usr/bin/gamemoderun"]
         }
@@ -29,7 +28,6 @@
       {
         "name": "Enable mangohud",
         "example_value": "mangohud",
-        "value": "",
         "limitation": {
           "file": ["/usr/bin/mangohud"]
         }
@@ -37,15 +35,20 @@
       {
         "name": "Enable vkBasalt",
         "example_value": "ENABLE_VKBASALT=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/lib/libvkbasalt.so", "/opt/vkBasalt/lib/libvkbasalt.so"]
         }
       },
       {
+        "name": "Enable gamescope",
+        "example_value": "gamescope input_value --",
+        "default_value": "-f -U -h 720 -H 1080",
+        "text": "Enter green_gamescope_end cyan_arguments_end",
+        "additionalText": "\ncyan_-W_end, cyan_-H_end - set the resolution used by gamescope. Resizing the gamescope window will update these settings. Ignored in embedded mode. If -H is specified but -W isn't, a 16:9 aspect ratio is assumed. Defaults to 1280×720.\ncyan_-w_end, cyan_-h_end - set the resolution used by the game. If -h is specified but -w isn't, a 16:9 aspect ratio is assumed. Defaults to the values specified in -W and -H.\ncyan_-r_end - set a frame-rate limit for the game. Specified in frames per second. Defaults to unlimited.\ncyan_-o_end - set a frame-rate limit for the game when unfocused. Specified in frames per second. Defaults to unlimited.\ncyan_-U_end - use AMD FidelityFX™ Super Resolution 1.0 for upscaling.\ncyan_-Y_end - use NVIDIA Image Scaling v1.0.3 for upscaling.\ncyan_-i_end - use integer scaling.\ncyan_-b_end - create a border-less window.\ncyan_-f_end - create a full-screen window.\n"
+      },
+      {
         "name": "Enable debug",
         "example_value": "on",
-        "value": "",
         "limitation": {
           "launcher": ["wine","proton","retroarch"]
         }
@@ -58,7 +61,6 @@
       {
         "name": "Enable ESYNC",
         "example_value": "WINEESYNC=1",
-        "value": "",
         "limitation": {
           "launcher": ["wine"]
         }
@@ -66,7 +68,6 @@
       {
         "name": "Enable FSYNC",
         "example_value": "WINEFSYNC=1",
-        "value": "",
         "limitation": {
           "launcher": ["wine"]
         }
@@ -74,7 +75,6 @@
       {
         "name": "Enable WineD3D",
         "example_value": "WINEDLLOVERRIDES='dxgi=b;d3d9=b;d3d10core=b;d3d11=b'",
-        "value": "",
         "limitation": {
           "launcher": ["wine"]
         }
@@ -83,9 +83,30 @@
         "name": "Enable virtual desktop",
         "example_value": "explorer /desktop='launcher_name',input_value",
         "default_value": "1920x1080",
-        "value": "",
+        "text": "Enter cyan_width_end and cyan_height_end of green_virtual desktop_end (Example: cyan_1600x900_end)",
         "limitation": {
           "launcher": ["wine"]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wine FSR Settings",
+    "settings": [
+      {
+        "name": "Enable Wine FSR",
+        "example_value": "WINE_FULLSCREEN_FSR=1",
+        "limitation": {
+          "launcher": ["wine","proton","steam"]
+        }
+      },
+      {
+        "name": "Set Wine FSR strength",
+        "example_value": "WINE_FULLSCREEN_FSR_STRENGTH=input_value",
+        "default_value": "2",
+        "text": "Enter green_FSR_end strength cyan_value_end (cyan_0_end <= cyan_value_end <= cyan_5_end)",
+        "limitation": {
+          "launcher": ["wine","proton","steam"]
         }
       }
     ]
@@ -96,7 +117,6 @@
       {
         "name": "Enable wined3d",
         "example_value": "PROTON_USE_WINED3D=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -104,7 +124,6 @@
       {
         "name": "Enable large address aware",
         "example_value": "PROTON_FORCE_LARGE_ADDRESS_AWARE=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -112,7 +131,6 @@
       {
         "name": "Enable old GL string",
         "example_value": "PROTON_OLD_GL_STRING=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -120,7 +138,6 @@
       {
         "name": "Enable Seccomp",
         "example_value": "PROTON_USE_SECCOMP=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -128,7 +145,6 @@
       {
         "name": "Disable D3D12",
         "example_value": "PROTON_NO_D3D12=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -136,7 +152,6 @@
       {
         "name": "Disable D3D11",
         "example_value": "PROTON_NO_D3D11=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -144,7 +159,6 @@
       {
         "name": "Disable D3D10",
         "example_value": "PROTON_NO_D3D10=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -152,7 +166,6 @@
       {
         "name": "Disable D3D9",
         "example_value": "PROTON_NO_D3D9=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -160,7 +173,6 @@
       {
         "name": "Disable ESYNC",
         "example_value": "PROTON_NO_ESYNC=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -168,7 +180,6 @@
       {
         "name": "Disable FSYNC",
         "example_value": "PROTON_NO_FSYNC=1",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
         }
@@ -176,31 +187,8 @@
       {
         "name": "Disable FUTEX2",
         "example_value": "PROTON_NO_FUTEX2=0",
-        "value": "",
         "limitation": {
           "launcher": ["proton","steam"]
-        }
-      }
-    ]
-  },
-  {
-    "name": "FSR Settings",
-    "settings": [
-      {
-        "name": "Enable Wine FSR",
-        "example_value": "WINE_FULLSCREEN_FSR=1",
-        "value": "",
-        "limitation": {
-          "launcher": ["wine","proton","steam"]
-        }
-      },
-      {
-        "name": "Set Wine FSR strength",
-        "example_value": "WINE_FULLSCREEN_FSR_STRENGTH=input_value",
-        "default_value": "2",
-        "value": "",
-        "limitation": {
-          "launcher": ["wine","proton","steam"]
         }
       }
     ]
@@ -211,7 +199,6 @@
       {
         "name": "Enable libstrangle",
         "example_value": "strangle",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -220,7 +207,7 @@
         "name": "Set max framerate",
         "example_value": "STRANGLE_FPS=input_value",
         "default_value": "60",
-        "value": "",
+        "text": "Enter cyan_maximum framerate_end",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -229,7 +216,7 @@
         "name": "Set max framerate for battery power",
         "example_value": "STRANGLE_FPS_BATTERY=input_value",
         "default_value": "60",
-        "value": "",
+        "text": "Enter cyan_maximum framerate_end when running on green_battery power_end",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -238,7 +225,8 @@
         "name": "Enable Vsync",
         "example_value": "STRANGLE_VSYNC=input_value",
         "default_value": "2",
-        "value": "",
+        "text": "Enter green_Vsync_end cyan_value_end",
+        "additionalText": "\n\tgreen_OpenGL_end\ncyan_ -1_end - Adaptive sync (unconfirmed if this actually works)\ncyan_ 0_end - Force off\ncyan_ 1_end - Force on\ncyan_ n_end - Sync to [refresh rate / n]\n\n\tgreen_Vulkan_end\ncyan_ 0_end - Force off\ncyan_ 1_end - Mailbox mode. Vsync with uncapped framerate\ncyan_ 2_end - Traditional vsync with framerate capped to refresh rate\ncyan_ 3_end - Adaptive vsync with tearing at low framerates\n",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -246,7 +234,6 @@
       {
         "name": "Run glFinish after every frame",
         "example_value": "STRANGLE_GLFINISH=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -254,7 +241,7 @@
       {
         "name": "Set mip-map LoD bias",
         "example_value": "STRANGLE_PICMIP=input_value",
-        "value": "",
+        "text": "Enter green_mip-map LoD bias_end cyan_value_end (cyan_-16_end <= cyan_value_end <= cyan_16_end)",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -262,7 +249,7 @@
       {
         "name": "Set anisotropic filtering level (Vulkan only)",
         "example_value": "STRANGLE_AF=input_value",
-        "value": "",
+        "text": "Enter green_anisotropic filtering_end cyan_value_end (cyan_1_end <= cyan_value_end <= cyan_16_end)",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -270,7 +257,6 @@
       {
         "name": "Enable force trilinear filtering (Vulkan only)",
         "example_value": "STRANGLE_TRILINEAR=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -278,7 +264,6 @@
       {
         "name": "Disable linear texture filtering (Vulkan only)",
         "example_value": "STRANGLE_RETRO=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -286,7 +271,6 @@
       {
         "name": "Disable dlsym hooking",
         "example_value": "STRANGLE_NODLSYM=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -294,7 +278,6 @@
       {
         "name": "Stop strangle OpenGL libs from loading",
         "example_value": "STRANGLE_VKONLY=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -302,7 +285,6 @@
       {
         "name": "Enable the implicit Vulkan layer",
         "example_value": "ENABLE_VK_LAYER_TORKEL104_libstrangle=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -310,7 +292,6 @@
       {
         "name": "Disable the implicit Vulkan layer",
         "example_value": "DISABLE_VK_LAYER_TORKEL104_libstrangle=1",
-        "value": "",
         "limitation": {
           "file": ["/usr/local/bin/strangle","/usr/bin/strangle"]
         }
@@ -324,7 +305,8 @@
         "name": "Enable DxvkHUD",
         "example_value": "DXVK_HUD=input_value",
         "default_value": "full",
-        "value": "",
+        "text": "Enter green_DxvkHUD_end cyan_options_end (Example: cyan_fps,frametimes,scale=0.8_end)",
+        "additionalText": "\ncyan_ devinfo_end - Displays the name of the GPU and the driver version\ncyan_ fps_end - Shows the current frame rate\ncyan_ frametimes_end - Shows a frame time graph\ncyan_ submissions_end - Shows the number of command buffers submitted per frame\ncyan_ drawcalls_end - Shows the number of draw calls and render passes per frame\ncyan_ pipelines_end - Shows the total number of graphics and compute pipelines\ncyan_ memory_end - Shows the amount of device memory allocated and used\ncyan_ gpuload_end - Shows estimated GPU load. May be inaccurate\ncyan_ version_end - Shows DXVK version\ncyan_ api_end - Shows the D3D feature level used by the application\ncyan_ compiler_end - Shows shader compiler activity\ncyan_ samplers_end - Shows the current number of sampler pairs used [D3D9 Only]\ncyan_ scale=value_end - Scales the HUD by a factor of x (e.g. 1.5)\ncyan_ full_end - Enable all options\n",
         "limitation": {
           "launcher": ["wine","proton","steam"]
         }
@@ -332,7 +314,6 @@
       {
         "name": "Enable Dxvk async",
         "example_value": "DXVK_ASYNC=1",
-        "value": "",
         "limitation": {
           "launcher": ["wine","proton","steam"]
         }
@@ -340,7 +321,6 @@
       {
         "name": "Disable state cache",
         "example_value": "DXVK_STATE_CACHE=0",
-        "value": "",
         "limitation": {
           "launcher": ["wine","proton","steam"]
         }
@@ -353,7 +333,6 @@
       {
         "name": "Enable threaded optimizations",
         "example_value": "__GL_THREADED_OPTIMIZATIONS=1",
-        "value": "",
         "limitation": {
           "video": "NVIDIA"
         }
@@ -361,7 +340,6 @@
       {
         "name": "Enable graphics API visual indicator",
         "example_value": "__GL_SHOW_GRAPHICS_OSD=1",
-        "value": "",
         "limitation": {
           "video": "NVIDIA"
         }
@@ -374,7 +352,6 @@
       {
         "name": "Enable threaded optimizations",
         "example_value": "mesa_glthread=true",
-        "value": "",
         "limitation": {
           "video": "AMD"
         }
@@ -382,7 +359,6 @@
       {
         "name": "Enable radeon ACO vulkan compiler",
         "example_value": "RADV_PERFTEST=aco",
-        "value": "",
         "limitation": {
           "video": "AMD"
         }
