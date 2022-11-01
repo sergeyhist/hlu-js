@@ -108,6 +108,16 @@
         "limitation": {
           "launcher": ["wine","proton","steam"]
         }
+      },
+      {
+        "name": "Set Wine FSR mode",
+        "example_value": "WINE_FULLSCREEN_FSR_MODE=input_value",
+        "default_value": "balanced",
+        "text": "Enter cyan_preset value_end",
+        "additionalText": "\n This option takes one of four green_preset values_end: cyan_performance_end, cyan_balanced_end, cyan_quality_end, cyan_ultra_end.\n Depending on what cyan_preset value_end is passed, green_Wine|Proton_end will check your display's resolution and calculate an appropriate fullscreen resolution.\n",
+        "limitation": {
+          "launcher": ["wine","proton","steam"]
+        }
       }
     ]
   },

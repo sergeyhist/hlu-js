@@ -29,11 +29,11 @@
   
   Also you may create symlink to /usr/local/bin (/usr/bin or ~/.local/bin):
 
-      $ ln -s <path_to_downloaded_file>/hlu.mjs /usr/local/bin/hlu
+      $ ln -s <path_to_downloaded_file>/hlu.mjs /usr/local/bin/
     
   and run from terminal
 
-      hlu
+      hlu.mjs
 
 ## Features:
 ### Launcher Controller:   

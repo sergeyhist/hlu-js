@@ -2,7 +2,6 @@
 "use strict"
 $.verbose=false;
 import {spawnSync} from 'child_process';
-import {workerData} from 'worker_threads';
 process.on('beforeExit', async () => {
   if (hlu_flags.restart == 0) {
     await script_exit()
@@ -250,6 +249,8 @@ else {
 function readLaunchers() {
   return fs.readJsonSync(hlu_userpath+'/launchers.json').slice(0).sort((a,b) => {
     return a.name.localeCompare(b.name);
+  }).sort((a,b) => {
+    return a.info.category.localeCompare(b.info.category);
   });
 }
 
