@@ -825,16 +825,16 @@ async function launcher_editor() {
   let launcher = await general_selector('launchers', launchers);
   switch (launcher[1].info.type) {
     case 'wine': case 'proton':
-      items = ['Change settings','Change name','Change executable','Change prefix and runner'];
+      items = ['Change settings','Change name','Change category','Change executable','Change prefix and runner'];
       break;
     case 'linux':
-      items = ['Change settings','Change name','Change executable'];
+      items = ['Change settings','Change name','Change category','Change executable'];
       break;
     case 'legendary':
-      items = ['Change settings','Change name'];
+      items = ['Change settings','Change name','Change category'];
       break;
     case 'retroarch':
-      items = ['Change settings','Change name'];
+      items = ['Change settings','Change name','Change category'];
       break;
   };
   switch (await list_options({
@@ -882,6 +882,12 @@ async function launcher_editor() {
       fs.outputJsonSync(hlu_userpath+'/launchers.json', launchers, {spaces: 2});
       break;
     case '3':
+      launcher[1].info.category = await general_input('Enter '+chalk.green('launcher')+' '+chalk.cyan('category'), 'launcher_categories');
+      launchers.splice(launcher[0], 1);
+      launchers.push(launcher[1]);
+      fs.outputJsonSync(hlu_userpath+'/launchers.json', launchers, {spaces: 2});
+      break;
+    case '4':
       switch (launcher[1].info.type) {
         case 'wine': case 'proton':
           launcher[1].info.exec = await exec_init(await general_input('Enter '+chalk.green('path to the')+' '+chalk.cyan('executable'), 'exec_paths'), ['exe']);
@@ -894,7 +900,7 @@ async function launcher_editor() {
       launchers.push(launcher[1]);
       fs.outputJsonSync(hlu_userpath+'/launchers.json', launchers, {spaces: 2});
       break;
-    case '4':
+    case '5':
       launcher[1].info.prefix = await general_selector('prefixes', launcher[1].info.type);
       launcher[1].info.runner = await general_selector('runners', launcher[1].info.type);
       launchers.splice(launcher[0], 1);
@@ -1264,6 +1270,15 @@ async function package_installer(type, pack) {
         .replace('home_dir', os.homedir+'');
         fs.removeSync(packages.release[pack].folder);
         fs.moveSync(path.basename(release, '.'+packages.release[pack].extension), packages.release[pack].folder);
+        if (fs.existsSync(packages.release[pack].folder+'/compatibilitytool.vdf')) {
+          let newArray = [];
+          for (let line of fs.readFileSync(packages.release[pack].folder+'/compatibilitytool.vdf', {encoding: 'utf-8', flag: 'r'}).split('\n')) {
+            let selectedLine = line;
+            if (line.includes('"display_name"')) {selectedLine = '      "display_name" "'+pack+'"'};
+            newArray.push(selectedLine);
+          };
+          fs.writeFileSync(packages.release[pack].folder+'/compatibilitytool.vdf', newArray.join('\n'))
+        };
       } else {
         fs.removeSync(packages.release[pack].git_name);
         fs.moveSync(path.basename(release, '.'+packages.release[pack].extension), packages.release[pack].git_name);
