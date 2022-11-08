@@ -2,6 +2,7 @@
 	"git": {
 		"DXVK": {
 			"url": "https://github.com/doitsujin/dxvk.git",
+            "url_args": "--recursive",
 			"delete_folders": ["dlls"],
 			"build_command": "./package-release.sh master dlls --no-package"
 		},

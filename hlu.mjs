@@ -1048,7 +1048,7 @@ async function prefix_manager(type) {
   let prefixes = fs.readJsonSync(hlu_userpath+'/prefixes.json');
   switch (type) {
     case 'wine':
-      items = ['Add prefix','Delete prefix','Create prefix','Install DXVK','Install VKD3D','Install MF','Install MF-Cab'];
+      items = ['Add prefix','Delete prefix','Create prefix','DXVK Install/Uninstall','VKD3D Install/Uninstall','MF Install','MF-Cab Install'];
       break;
     case 'proton':
       items = ['Add prefix','Delete prefix'];
@@ -1290,11 +1290,13 @@ async function package_installer(type, pack) {
       if (fs.existsSync(hlu_packspath+'/'+path.basename(packages.git[pack].url, '.git'))) {
         cd(hlu_packspath);
         cd(path.basename(packages.git[pack].url, '.git'));
+        $.verbose = true;
         if (packages.git[pack].url_args) {
-          status = await $`git reset --hard; git submodule update ${packages.git[pack].url_args}; git pull ${packages.git[pack].url}`;
+          status = await $`git reset --hard; git submodule--helper update ${packages.git[pack].url_args}; git pull ${packages.git[pack].url}`;
         } else {
           status = await $`git reset --hard; git pull ${packages.git[pack].url}`;
         };
+        $.verbose = false;
         if (status.stdout.includes('Already up to date') && packages.git[pack].build_command) {
           switch(await general_input('Rebuild '+chalk.green('package')+' ? '+chalk.cyan('y|N'))) {
             case 'y': case 'Y':
