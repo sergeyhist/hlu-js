@@ -1115,10 +1115,10 @@ async function prefix_manager(type) {
           })) {
             case '1':
               await package_installer('git','DXVK');
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/dxvk/dlls/dxvk-master/setup_dxvk.sh install`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/dxvk/dlls/dxvk-master/setup_dxvk.sh install`);
               break;
             case '2':
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/dxvk/dlls/dxvk-master/setup_dxvk.sh uninstall`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/dxvk/dlls/dxvk-master/setup_dxvk.sh uninstall`);
               break;
           };
           break;
@@ -1129,10 +1129,10 @@ async function prefix_manager(type) {
           })) {
             case '1':
               await package_installer('release','DXVK');
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/dxvk/setup_dxvk.sh install`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/dxvk/setup_dxvk.sh install`);
               break;
             case '2':
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/dxvk/setup_dxvk.sh uninstall`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/dxvk/setup_dxvk.sh uninstall`);
               break;
           }
           break;
@@ -1152,10 +1152,10 @@ async function prefix_manager(type) {
           })) {
             case '1':
               await package_installer('git','VKD3D');
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh install`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh install`);
               break;
             case '2':
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh uninstall`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh uninstall`);
               break;
           };
           break;
@@ -1166,10 +1166,10 @@ async function prefix_manager(type) {
           })) {
             case '1':
               await package_installer('release','VKD3D');
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh install`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh install`);
               break;
             case '2':
-              await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh uninstall`;
+              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh uninstall`);
               break;
           }
           break;
@@ -1179,13 +1179,13 @@ async function prefix_manager(type) {
       prefix = await general_selector('prefixes', type);
       runner = await general_selector('runners', type);
       await package_installer('git', 'MF')
-      await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/mf-install/mf-install.sh uninstall`;
+      verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/mf-install/mf-install.sh uninstall`);
       break;
     case '7':
       prefix = await general_selector('prefixes', type);
       runner = await general_selector('runners', type);
       await package_installer('git', 'MF-Cab')
-      await $`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/mf-installcab/install-mf-64.sh uninstall`;
+      verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/mf-installcab/install-mf-64.sh uninstall`);
       break;
   };
 }
@@ -1274,6 +1274,7 @@ async function package_installer(type, pack) {
           let newArray = [];
           for (let line of fs.readFileSync(packages.release[pack].folder+'/compatibilitytool.vdf', {encoding: 'utf-8', flag: 'r'}).split('\n')) {
             let selectedLine = line;
+            if (line.includes('Internal name')) {selectedLine = '    "'+pack+'"'};
             if (line.includes('"display_name"')) {selectedLine = '      "display_name" "'+pack+'"'};
             newArray.push(selectedLine);
           };
