@@ -629,6 +629,7 @@ async function retroarch_cores_init() {
     };
   }
   await cores_init(os.homedir+'/.config/retroarch/cores');
+  await cores_init(os.homedir+'/.var/app/org.libretro.RetroArch/config/retroarch/cores', '/var/lib/flatpak/app/org.libretro.RetroArch/current/19bc2de02efb8da5e2bea76f858cce45b1b20b11a2e134c462f22db0eba59d4f/files/share/libretro/info');
   await cores_init('/usr/lib/libretro', '/usr/share/libretro/info');
 }
 
@@ -1017,7 +1018,9 @@ async function launcher_command(launcher,settings) {
       launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' '));
       break;
     case 'retroarch':
-      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'retroarch --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
+      let retroarchExec = launcher.info.core.includes('org.libretro.RetroArch') ? 'org.libretro.RetroArch' : 'retroarch';
+
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+retroarchExec+' --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
   };
   return launcher_complete;
