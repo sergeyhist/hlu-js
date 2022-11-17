@@ -1,57 +1,60 @@
 {
-	"git": {
-		"DXVK": {
-			"url": "https://github.com/doitsujin/dxvk.git",
-            "url_args": "--recursive",
-			"delete_folders": ["dlls"],
-			"build_command": "./package-release.sh master dlls --no-package"
-		},
-		"VKD3D": {
-			"url": "https://github.com/HansKristian-Work/vkd3d-proton",
-			"url_args": "--recursive",
-			"delete_folders": ["dlls"],
-			"build_command": "./package-release.sh master dlls --no-package"
-		},
-		"MF": {
-			"url": "https://github.com/z0z0z/mf-install.git"
-		},
-		"MF-Cab": {
-			"url": "https://github.com/z0z0z/mf-installcab.git"
-		}
-	},
-	"release": {
-		"DXVK": {
-			"author": "doitsujin",
-			"git_name": "dxvk",
-			"extension": "tar.gz",
-			"flags": ["archive"]
-		},
-		"VKD3D": {
-			"author": "HansKristian-Work",
-			"git_name": "vkd3d-proton",
-			"extension": "tar.zst",
-			"flags": ["archive"]
-		},
-		"GE-Proton": {
-			"author": "GloriousEggroll",
-			"git_name": "proton-ge-custom",
-			"extension": "tar.gz",
-			"flags": ["archive", "install"],
-			"folder": "home_dir/.steam/root/compatibilitytools.d/GE-Proton"
-		},
-		"GE-Wine": {
-			"author": "GloriousEggroll",
-			"git_name": "wine-ge-custom",
-			"extension": "tar.xz",
-			"flags": ["archive","install"],
-			"folder": "hlu_packspath/GE-Wine"
-		},
-        "Luxtorpeda": {
-          "author": "luxtorpeda-dev",
-          "git_name": "luxtorpeda",
-          "extension": "tar.xz",
-          "flags": ["archive", "install"],
-          "folder": "home_dir/.steam/root/compatibilitytools.d/Luxtorpeda"
-        }
-	}
+  "git": {
+    "DXVK": {
+      "url": "https://github.com/doitsujin/dxvk.git",
+      "url_args": "--recursive",
+      "delete_folders": ["dlls"],
+      "build_command": "./package-release.sh master dlls --no-package"
+    },
+    "VKD3D": {
+      "url": "https://github.com/HansKristian-Work/vkd3d-proton",
+      "url_args": "--recursive",
+      "delete_folders": ["dlls"],
+      "build_command": "./package-release.sh master dlls --no-package"
+    },
+    "MF": {
+      "url": "https://github.com/z0z0z/mf-install.git"
+    },
+    "MF-Cab": {
+      "url": "https://github.com/z0z0z/mf-installcab.git"
+    }
+  },
+  "release": {
+    "DXVK": {
+      "author": "doitsujin",
+      "git_name": "dxvk",
+      "extension": "tar.gz",
+      "flags": ["archive"]
+    },
+    "VKD3D": {
+      "author": "HansKristian-Work",
+      "git_name": "vkd3d-proton",
+      "extension": "tar.zst",
+      "flags": ["archive"]
+    },
+    "GE-Proton": {
+      "author": "GloriousEggroll",
+      "git_name": "proton-ge-custom",
+      "extension": "tar.gz",
+      "flags": ["archive", "install"],
+      "path": "compatibilitytools.d/name",
+      "folders": ["home_dir/.steam/root", "home_dir/.var/app/com.valvesoftware.Steam/.steam/root"]
+    },
+    "GE-Wine": {
+      "author": "GloriousEggroll",
+      "git_name": "wine-ge-custom",
+      "extension": "tar.xz",
+      "flags": ["archive","install"],
+      "path": "name",
+      "folders": ["hlu_packspath"]
+    },
+    "Luxtorpeda": {
+      "author": "luxtorpeda-dev",
+      "git_name": "luxtorpeda",
+      "extension": "tar.xz",
+      "flags": ["archive", "install"],
+      "path": "compatibilitytools.d/name",
+      "folders": ["home_dir/.steam/root", "home_dir/.var/app/com.valvesoftware.Steam/.steam/root"]
+    }
+  }
 }
