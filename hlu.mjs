@@ -131,6 +131,7 @@ if (!fs.existsSync(hlu_userpath+'/runners.json')) {
 
 //Arguments
 if (process.argv[3] == 'run') {await launcher_runner()}
+else if (process.argv[3] == 'services') {await systemd_controller()}
 else {
   // Init const variables
   if (fs.existsSync(os.homedir+'/.steam') || fs.existsSync(os.homedir+'/.var/app/com.valvesoftware.Steam')) {
@@ -476,43 +477,43 @@ async function steam_apps_init() {
             expandDirectories: {files: ['appmanifest_*']},
             deep: 2
           })) {
-            steam_appmanifests.push(item2);
+            !steam_appmanifests.includes(item2) && steam_appmanifests.push(item2);
           };
         };
       };
-      for (let item of steam_appmanifests) {
-        let steam_appid = await $`echo $(grep '"appid"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
-        let steam_name = await $`echo $(grep '"name"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
-        steam_name = steam_name.stdout.replace(' \\','');
-        let steam_path = await $`echo $(grep '"installdir"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
-        let steam_dirname = await $`dirname ${item} | tr -d '\n'`;
-        if (steam_blocklist.includes(steam_appid.stdout)) {
-          steam_apps.blocklist.push({
-            name: steam_name,
-            appid: steam_appid.stdout
-          });
-        } else if (steam_protonlist.includes(steam_appid.stdout)) {
-          steam_apps.proton_builds.push({
-            name: steam_name,
-            appid: steam_appid.stdout,
-            path: steam_dirname.stdout+'/common/'+steam_path.stdout+'/proton'
-          });
-        } else {
-          if (fs.existsSync(steam_dirname.stdout+'/compatdata/'+steam_appid+'/pfx')) {
-            steam_apps.wine.push({
-              name: steam_name,
-              appid: steam_appid.stdout,
-              path: steam_dirname.stdout+'/common/'+steam_path.stdout,
-              prefix: steam_dirname.stdout+'/compatdata/'+steam_appid
-            });
-          } else {
-            steam_apps.native.push({
-              name: steam_name,
-              appid: steam_appid.stdout,
-              path: steam_dirname.stdout+'/common/'+steam_path.stdout
-            });
-          };
-        };
+    };
+  };
+  for (let item of steam_appmanifests) {
+    let steam_appid = await $`echo $(grep '"appid"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
+    let steam_name = await $`echo $(grep '"name"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
+    steam_name = steam_name.stdout.replace(' \\','');
+    let steam_path = await $`echo $(grep '"installdir"' ${item} | cut -d'"' -f4) | tr -d '\n'`;
+    let steam_dirname = await $`dirname ${item} | tr -d '\n'`;
+    if (steam_blocklist.includes(steam_appid.stdout)) {
+      steam_apps.blocklist.push({
+        name: steam_name,
+        appid: steam_appid.stdout
+      });
+    } else if (steam_protonlist.includes(steam_appid.stdout)) {
+      steam_apps.proton_builds.push({
+        name: steam_name,
+        appid: steam_appid.stdout,
+        path: steam_dirname.stdout+'/common/'+steam_path.stdout+'/proton'
+      });
+    } else {
+      if (fs.existsSync(steam_dirname.stdout+'/compatdata/'+steam_appid+'/pfx')) {
+        steam_apps.wine.push({
+          name: steam_name,
+          appid: steam_appid.stdout,
+          path: steam_dirname.stdout+'/common/'+steam_path.stdout,
+          prefix: steam_dirname.stdout+'/compatdata/'+steam_appid
+        });
+      } else {
+        steam_apps.native.push({
+          name: steam_name,
+          appid: steam_appid.stdout,
+          path: steam_dirname.stdout+'/common/'+steam_path.stdout
+        });
       };
     };
   };
