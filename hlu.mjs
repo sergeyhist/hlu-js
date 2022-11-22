@@ -963,6 +963,7 @@ async function launcher_info() {
 async function launcher_command(launcher,settings) {
   let launcher_complete = [];
   let launcher_debug = ' &> /dev/null'
+  let steamPath = fs.existsSync(os.homedir+'/.steam/steam') ? os.homedir+'/.steam/steam' : fs.existsSync(os.homedir+'/.var/app/com.valvesoftware.Steam/.steam/steam') ? os.homedir+'/.var/app/com.valvesoftware.Steam/.steam/steam' : '';
   let launcher_command = {
     pre: [],
     mid: [],
@@ -998,7 +999,7 @@ async function launcher_command(launcher,settings) {
       break;
     case 'proton':
       launcher_complete.push('cd "'+path.dirname(launcher.info.exec)+'"');
-      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" "'+launcher.info.runner+'" run "'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'STEAM_COMPAT_CLIENT_INSTALL_PATH="'+steamPath+'" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" "'+launcher.info.runner+'" run "'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
     case 'linux':
       launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'"'+launcher.info.exec+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
@@ -1012,7 +1013,7 @@ async function launcher_command(launcher,settings) {
         launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'legendary launch --wine "'+launcher.info.runner+'" --wine-prefix "'+launcher.info.prefix+'" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
       } else {
         launcher_complete.push('legendary update -y --update-only '+launcher.info.id+launcher_debug.replace('>','>>'));
-        launcher_complete.push('STEAM_COMPAT_CLIENT_INSTALL_PATH="'+os.homedir+'.steam/steam" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" '+launcher_command.pre.join(' ')+space.pre+'legendary launch --no-wine --wrapper "'+'\''+launcher.info.runner+'\' run" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
+        launcher_complete.push('STEAM_COMPAT_CLIENT_INSTALL_PATH="'+steamPath+'" STEAM_COMPAT_DATA_PATH="'+launcher.info.prefix+'" '+launcher_command.pre.join(' ')+space.pre+'legendary launch --no-wine --wrapper "'+'\''+launcher.info.runner+'\' run" '+launcher.info.id+space.post+launcher_command.post.join(' ')+launcher_debug.replace('>','>>'));
       };
       break;
     case 'steam':
