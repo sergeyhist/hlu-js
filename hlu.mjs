@@ -975,7 +975,8 @@ async function launcher_command(launcher,settings) {
     post: ''
   };
   if (settings) {
-    let gamescope;
+    let gamescope; 
+    let strangle;
     for (let i in settings) {
       if (settings[i].value != '') {
         switch (settings[i].name) {
@@ -983,10 +984,12 @@ async function launcher_command(launcher,settings) {
           case 'Add arguments': launcher_command.post.push(settings[i].value); break;
           case 'Enable debug': launcher_debug = ' &> "'+hlu_logspath+'/'+launcher.name.replace(/ /g,'_')+'.log"'; break;
           case 'Enable gamescope': gamescope = settings[i].value; break;
+          case 'Enable libstrangle': strangle = settings[i].value; break;
           default: launcher_command.pre.push(settings[i].value)
         };
       };
     };
+    strangle && launcher_command.pre.push(strangle);
     gamescope && launcher_command.pre.push(gamescope);
   };
   if (launcher_command.pre.length > 0) {space.pre = ' '};
