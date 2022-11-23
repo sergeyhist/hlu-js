@@ -1590,7 +1590,7 @@ async function steam_options() {
   let settings = await settings_init(launcher, fs.readJsonSync(hlu_userpath+'/settings.json'));
   for (let i in settings) {
     for (let j in settings[i].settings) {
-      if (settings[i].settings[j].value != '') {
+      if (settings[i].settings[j].value) {
         launcher_settings.push({
           name: settings[i].settings[j].name,
           value: settings[i].settings[j].value
@@ -1599,8 +1599,8 @@ async function steam_options() {
     };
   };
   let command = await launcher_command(launcher, launcher_settings);
-  console.log('Paste '+chalk.cyan('this')+' to the '+chalk.green('steam game')+' properties:\n'+chalk.cyan(command));
-  $`echo ${command} | xclip -sel clip`;
+  console.log('Copy & paste '+chalk.cyan('this')+' to the '+chalk.green('steam game')+' properties:\n'+chalk.cyan(command));
+  $`echo ${command}`;
 }
 
 async function hlu_updater() {
