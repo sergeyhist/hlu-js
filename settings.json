@@ -26,7 +26,7 @@
         }
       },
       {
-        "name": "Enable mangohud",
+        "name": "Enable MangoHud",
         "example_value": "mangohud",
         "limitation": {
           "file": ["/usr/bin/mangohud"]
@@ -45,6 +45,10 @@
         "default_value": "-f -U -h 720 -H 1080",
         "text": "Enter green_gamescope_end cyan_arguments_end",
         "additionalText": "\ncyan_-W_end, cyan_-H_end - set the resolution used by gamescope. Resizing the gamescope window will update these settings. Ignored in embedded mode. If -H is specified but -W isn't, a 16:9 aspect ratio is assumed. Defaults to 1280×720.\ncyan_-w_end, cyan_-h_end - set the resolution used by the game. If -h is specified but -w isn't, a 16:9 aspect ratio is assumed. Defaults to the values specified in -W and -H.\ncyan_-r_end - set a frame-rate limit for the game. Specified in frames per second. Defaults to unlimited.\ncyan_-o_end - set a frame-rate limit for the game when unfocused. Specified in frames per second. Defaults to unlimited.\ncyan_-U_end - use AMD FidelityFX™ Super Resolution 1.0 for upscaling.\ncyan_-Y_end - use NVIDIA Image Scaling v1.0.3 for upscaling.\ncyan_-i_end - use integer scaling.\ncyan_-b_end - create a border-less window.\ncyan_-f_end - create a full-screen window.\n"
+      },
+      {
+        "name": "Enable Zink",
+        "example_value": "__GLX_VENDOR_LIBRARY_NAME=mesa MESA_LOADER_DRIVER_OVERRIDE=zink GALLIUM_DRIVER=zink"
       },
       {
         "name": "Enable debug",
