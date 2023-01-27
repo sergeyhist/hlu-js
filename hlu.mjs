@@ -1133,32 +1133,12 @@ async function prefix_manager(type) {
         items: ['Git master','Release']
       })) {
         case '1':
-          switch (await list_options({
-            name: 'DXVK Git Package',
-            items: ['Install','Uninstall']
-          })) {
-            case '1':
-              await package_installer('git','DXVK');
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/dxvk/dlls/dxvk-master/setup_dxvk.sh install`);
-              break;
-            case '2':
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/dxvk/dlls/dxvk-master/setup_dxvk.sh uninstall`);
-              break;
-          };
+          await package_installer('git','DXVK');
+          verbose_bash(`WINEPREFIX=${prefix}; cp ${hlu_relpath}/dxvk/x64/*.dll $WINEPREFIX/drive_c/windows/system32; cp ${hlu_relpath}/dxvk/x32/*.dll $WINEPREFIX/drive_c/windows/syswow64; ${runner}boot -u`);
           break;
         case '2':
-          switch (await list_options({
-            name: 'DXVK Release Package',
-            items: ['Install','Uninstall']
-          })) {
-            case '1':
-              await package_installer('release','DXVK');
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/dxvk/setup_dxvk.sh install`);
-              break;
-            case '2':
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/dxvk/setup_dxvk.sh uninstall`);
-              break;
-          }
+          await package_installer('release','DXVK');
+          verbose_bash(`WINEPREFIX=${prefix}; cp ${hlu_relpath}/dxvk/x64/*.dll $WINEPREFIX/drive_c/windows/system32; cp ${hlu_relpath}/dxvk/x32/*.dll $WINEPREFIX/drive_c/windows/syswow64; ${runner}boot -u`);
           break;
       }
       break;
@@ -1170,32 +1150,12 @@ async function prefix_manager(type) {
         items: ['Git master','Release']
       })) {
         case '1':
-          switch (await list_options({
-            name: 'VKD3D Git Package',
-            items: ['Install','Uninstall']
-          })) {
-            case '1':
-              await package_installer('git','VKD3D');
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh install`);
-              break;
-            case '2':
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh uninstall`);
-              break;
-          };
+          await package_installer('git','VKD3D');
+          verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_packspath}/vkd3d-proton/dlls/vkd3d-proton-master/setup_vkd3d_proton.sh install`);
           break;
         case '2':
-          switch (await list_options({
-            name: 'VKD3D Release Package',
-            items: ['Install','Uninstall']
-          })) {
-            case '1':
-              await package_installer('release','VKD3D');
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh install`);
-              break;
-            case '2':
-              verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh uninstall`);
-              break;
-          }
+          await package_installer('release','VKD3D');
+          verbose_bash(`WINEPREFIX=${prefix} PATH=${path.dirname(runner)}:$PATH WINELOADER=${runner} ${hlu_relpath}/vkd3d-proton/setup_vkd3d_proton.sh install`);
           break;
       }
       break;
@@ -1446,7 +1406,7 @@ async function legendary_helper() {
               await verbose_bash(`legendary clean-saves --delete-incomplete`);
               break;
             case '12':
-              await verbose_bash(`legendary info ${await legendary_list('installed')}`);
+              await verbose_bash(`legendary info ${await legendary_list('all')}`);
               break;
             case '13':
               await verbose_bash(`legendary eos-overlay install --path "${await general_input('Enter '+chalk.cyan('path')+' where the '+chalk.green('eos-overlay')+' will be installed', 'legendary_paths')}/.overlay"`);
