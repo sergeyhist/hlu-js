@@ -201,6 +201,14 @@
         "limitation": {
           "launcher": ["proton","steam"]
         }
+      },
+      {
+        "name": "Enable EasyAntiCheat",
+        "example_value": "PROTON_EAC_RUNTIME=\"input_value\"",
+        "text": "Enter cyan_path_end to the green_Steam EAC Runtime_end (Example: cyan_/path/to/steam/steamapps/common/Proton EasyAntiCheat Runtime_end)",
+        "limitation": {
+          "launcher": ["proton"]
+        }
       }
     ]
   },
