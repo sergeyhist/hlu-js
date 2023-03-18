@@ -1488,7 +1488,7 @@ async function systemd_controller() {
                 if (service+1 != 0) {
                   switch(await list_options({
                     name: services[service].name,
-                    items: ['Start','Stop','Restart','Enable','Disable','Status','Unlist'],
+                    items: ['Start','Stop','Restart','Enable','Disable','Status', 'Reset', 'Unlist'],
                     options: ['continue']
                   })) {
                     case '1':
@@ -1534,6 +1534,13 @@ async function systemd_controller() {
                       };
                       break;
                     case '7':
+                      if (services[service].type == 'user') {
+                        await verbose_bash(`systemctl reset-failed --user ${services[service].name}`);
+                      } else {
+                        await verbose_bash(`systemctl reset-failed ${services[service].name}`);
+                      };
+                      break;
+                    case '8':
                       services.splice(service, 1);
                       fs.outputJsonSync(hlu_userpath+'/services.json', services, {spaces: 2});
                       break;
