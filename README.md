@@ -92,7 +92,7 @@ and run from terminal
   - AMD settings
     + Enable threaded optimizations
     + Enable radeon ACO vulkan compiler
-- Generate bash scripts from launchers list.Scripts are located in **~/.local/share/Hist/Scripts** directory and sorted by categories.
+- Generate bash scripts from launchers list. Scripts are located in **~/.local/share/Hist/Scripts** directory and sorted by categories.
 - Display information about launcher in terminal.
 
 ### Wine/Proton Helper:
@@ -146,7 +146,7 @@ and run from terminal
 
 ### Launch options for steam game
 
-- Select needed options from launchers controller settings and paste them into steam game options.
+- Select needed options and paste them into steam game launch options.
 
 ### Install [Luxtorpeda](https://github.com/luxtorpeda-dev/luxtorpeda)
 

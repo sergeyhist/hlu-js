@@ -1,12 +1,17 @@
 #!/usr/bin/env zx
+
 "use strict"
+
 $.verbose=false;
-import {spawnSync} from 'child_process';
+
+import {spawnSync, exec} from 'child_process';
+
 process.on('beforeExit', async () => {
   if (hlu_flags.restart == 0) {
     await script_exit()
   };
 });
+
 process.on('uncaughtException', async (err,origin) => {
   console.log('\n\t'+chalk.red('Error')+'\n'+err+'\n\t'+chalk.red('Origin')+'\n'+origin+'\n');
   if (hlu_flags.restart == 0) {
@@ -715,6 +720,28 @@ async function launcher_init(type) {
       };
       break;
     case 'retroarch':
+      const retroarchNative = await $`echo $(command -v retroarch)`;
+      const retroarchFlatpak = await $`echo $(command -v org.libretro.RetroArch)`;
+
+      const retroarchNativeExec = retroarchNative.stdout != '/n' ? retroarchNative.stdout.trim() : null; 
+      const retroarchFlatpakExec = retroarchFlatpak.stdout != '/n' ? retroarchFlatpak.stdout.trim() : null; 
+
+      if (retroarchNativeExec && retroarchFlatpakExec) {
+        const retroarchType = await list_options({
+          name: 'Retroarch executable',
+          items: ['Native', 'Flatpak']
+        });
+
+        switch (retroarchType) {
+          case '1': launcher.info.executable = 'retroarch'; break;
+          case '2': launcher.info.executable = 'org.libretro.RetroArch'; break;
+        };
+      } else if (retroarchNativeExec && !retroarchFlatpakExec) {
+        launcher.info.executable = 'retroarch';
+      } else if (!retroarchNativeExec && retroarchFlatpakExec) {
+        launcher.info.executable = 'org.libretro.RetroArch';
+      };
+
       launcher.info.core = await general_selector('retroarch cores');
       launcher.info.rom = await general_input('Enter '+chalk.cyan('path')+' to the '+chalk.green('ROM')+' (Example: '+chalk.cyan('/folder/with/rom/ROM.extension')+')');
       launcher.name = await general_input('Enter '+chalk.cyan('name')+' of the '+chalk.green('launcher'), 'launcher_names',
@@ -1023,9 +1050,7 @@ async function launcher_command(launcher,settings) {
       launcher_complete.push(launcher_command.pre.join(' ')+space.pre+'%command%'+space.post+launcher_command.post.join(' '));
       break;
     case 'retroarch':
-      let retroarchExec = launcher.info.core.includes('org.libretro.RetroArch') ? 'org.libretro.RetroArch' : 'retroarch';
-
-      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+retroarchExec+' --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
+      launcher_complete.push(launcher_command.pre.join(' ')+space.pre+launcher.info.executable+' --verbose -L "'+launcher.info.core+'"'+' "'+launcher.info.rom+'"'+space.post+launcher_command.post.join(' ')+launcher_debug);
       break;
   };
   return launcher_complete;
@@ -1254,7 +1279,7 @@ async function package_installer(type, pack) {
           if (fs.existsSync(folder)) {
             folder = folder + '/' + packages.release[pack].path.replace('name', pack); 
             fs.removeSync(folder);
-            fs.moveSync(path.basename(release, '.'+packages.release[pack].extension), folder);
+            fs.copySync(path.basename(release, '.'+packages.release[pack].extension), folder);
             if (fs.existsSync(folder+'/compatibilitytool.vdf')) {
               let newArray = [];
               for (let line of fs.readFileSync(folder+'/compatibilitytool.vdf', {encoding: 'utf-8', flag: 'r'}).split('\n')) {
@@ -1267,6 +1292,7 @@ async function package_installer(type, pack) {
             };
           };
         };
+        fs.removeSync(path.basename(release, '.' + packages.release[pack].extension));
       } else {
         fs.removeSync(packages.release[pack].git_name);
         fs.moveSync(path.basename(release, '.'+packages.release[pack].extension), packages.release[pack].git_name);
@@ -1568,9 +1594,16 @@ async function steam_options() {
       };
     };
   };
-  let command = await launcher_command(launcher, launcher_settings);
+  const command = await launcher_command(launcher, launcher_settings);
+  const sessionType = await $`echo $XDG_SESSION_TYPE`;
+
   console.log('Copy & paste '+chalk.cyan('this')+' to the '+chalk.green('steam game')+' properties:\n'+chalk.cyan(command));
   $`echo ${command}`;
+  
+  switch (sessionType.stdout.trim()) {
+    case 'wayland': exec(`wl-copy ${command}`, {timeout: 1000}); break;
+    default: $`echo ${command} | xclip -sel clip`;
+  }
 }
 
 async function hlu_updater() {
