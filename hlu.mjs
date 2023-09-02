@@ -213,7 +213,17 @@ else {
           };
           break;
         case '2':
-          await prefix_winetricks('wine');
+          switch (await list_options({
+            name: 'Prefix Type',
+            items: ['Wine','Proton']
+          })) {
+            case '1':
+              await prefix_winetricks('wine');
+              break;
+            case '2':
+              await prefix_winetricks('proton');
+              break;
+          };
           break;
         case '3':
           switch (await list_options({
@@ -1079,12 +1089,25 @@ async function prefix_winetricks(type) {
   let prefix;
   let runner;
   let command;
+
   prefix = await general_selector('prefixes', type);
   runner = await general_selector('runners', type);
+
+  if (type === 'proton') {
+    cd(path.dirname(runner));
+
+    runner = path.dirname(runner) + '/' + await glob(['**/wine64'][0]);
+  }
+
   command = await general_input('Enter '+chalk.green('winetricks')+' '+chalk.cyan('arguments')+' (Example: '+chalk.cyan('vcrun2019')+
     ') (For '+chalk.green('gui')+' just '+chalk.cyan('press "Enter"')+')', 'winetricks_args');
+
   switch (type) {
     case 'wine':
+      await verbose_bash(`WINEPREFIX="${prefix}" WINE="${runner}" winetricks ${command}`);
+      break;
+
+    case 'proton':
       await verbose_bash(`WINEPREFIX="${prefix}" WINE="${runner}" winetricks ${command}`);
       break;
   };
@@ -1153,6 +1176,7 @@ async function prefix_manager(type) {
     case '4':
       prefix = await general_selector('prefixes', type);
       runner = await general_selector('runners', type);
+
       switch (await list_options({
         name: 'DXVK Installer',
         items: ['Git master','Release']
@@ -1259,7 +1283,15 @@ async function package_installer(type, pack) {
       };
     };
     if (packages.git[pack].build_command) {
-      await verbose_bash(`${packages.git[pack].build_command}`);
+      try {
+        await verbose_bash(`${packages.git[pack].build_command}`);
+      } catch (error) {
+        switch(await general_input('Retry ' + chalk.green('build') + '? '+chalk.cyan('y|N'))) {
+          case 'y': case 'Y':
+            await verbose_bash(`${packages.git[pack].build_command}`);
+            break;
+        };
+      }
     };
   }
   let release_install = async () => {
