@@ -1096,6 +1096,7 @@ async function prefix_winetricks(type) {
   if (type === 'proton') {
     cd(path.dirname(runner));
 
+    prefix += '/pfx';
     runner = path.dirname(runner) + '/' + await glob(['**/wine64'][0]);
   }
 
