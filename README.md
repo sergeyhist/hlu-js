@@ -13,7 +13,7 @@
 
 Direct run:
 
-`zx "https://raw.githubusercontent.com/sergeyhist/hlu-js/main/hlu.mjs"`
+`zx "https://raw.githubusercontent.com/sergeyhist/hlu-js/main/dev/hlu.mjs"`
 
 ---
 
