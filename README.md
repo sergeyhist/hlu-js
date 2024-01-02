@@ -11,6 +11,18 @@
 
 ## Installation methods:
 
+NPM:
+
+Install package:
+
+`npm i -g hlu`
+
+Run:
+
+`hlu`
+
+---
+
 Direct run:
 
 `zx "https://raw.githubusercontent.com/sergeyhist/hlu-js/main/dev/hlu.mjs"`
