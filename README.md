@@ -13,13 +13,8 @@
 
 NPM:
 
-Install package:
-
-`npm i -g hlu`
-
-Run:
-
-`hlu`
+Install package: `npm i -g hlu`  
+Run: `hlu`
 
 ---
 
