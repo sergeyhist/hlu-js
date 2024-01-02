@@ -1,6 +1,6 @@
 {
   "entry": ["src/hlu.mts"],
-  "splitting": true,
+  "splitting": false,
   "outDir": "dev",
   "sourcemap": false,
   "format": "esm",

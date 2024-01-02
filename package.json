@@ -1,12 +1,33 @@
 {
+  "name": "hlu",
+  "description": "Hist Linux Utilities (NodeJS Version)",
+  "version": "1.0.5",
+  "main": "src/hlu.mts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergeyhist/hlu-js.git"
+  },
+  "keywords": [
+    "linux"
+  ],
+  "author": "Hist",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/sergeyhist/hlu-js/issues"
+  },
+  "homepage": "https://github.com/sergeyhist/hlu-js#readme",
   "dependencies": {
-    "typescript": "^5.2.2",
-    "zx": "^7.2.3"
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "tsup": "^7.2.0"
+    "tsup": "^7.2.0",
+    "zx": "^7.2.3"
   },
   "scripts": {
-    "dev": "tsup --watch"
+    "dev": "tsup src/hlu.mts --watch",
+    "build": "tsup src/hlu.mts"
+  },
+  "bin": {
+    "hlu": "dev/hlu.mjs"
   }
 }
