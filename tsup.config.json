@@ -1,0 +1,9 @@
+{
+  "entry": ["src/hlu.mts"],
+  "splitting": true,
+  "outDir": "dev",
+  "sourcemap": false,
+  "format": "esm",
+  "target": "node16",
+  "clean": true
+}

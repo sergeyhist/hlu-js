@@ -1,11 +1,12 @@
 # Hist Linux Utilities (NodeJS Version)
 ## Requirements:
 
-- [nodejs](https://nodejs.org/en/)
+- [nodejs](https://nodejs.org/en)
 - [zx](https://github.com/google/zx)
-- [wine](https://www.winehq.org/)
+- [wine](https://www.winehq.org)
 - [winetricks](https://github.com/Winetricks/winetricks)
-- [retroarch](https://www.retroarch.com/) (optional)
+- [wget](https://www.gnu.org/software/wget)
+- [retroarch](https://www.retroarch.com) (optional)
 - [legendary](https://github.com/derrod/legendary) (optional)
 
 ## Installation methods:
@@ -16,7 +17,7 @@ Direct run:
 
 ---
 
-Download "[hlu.mjs](https://raw.githubusercontent.com/sergeyhist/hlu-js/main/hlu.mjs)" file from the repo.  
+Download "[hlu.mjs](https://raw.githubusercontent.com/sergeyhist/hlu-js/main/dev/hlu.mjs)" file from the repo.  
 Give exec permission:
 
 `cd <path_to_downloaded_file>; chmod +x hlu.mjs`
