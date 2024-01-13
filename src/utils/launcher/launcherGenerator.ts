@@ -1,5 +1,11 @@
 import { cd, chalk, fs, $ } from "zx";
-import { ILauncher, appsPath, iconsPath, scriptsPath } from "../../model";
+import {
+  ILauncher,
+  appsPath,
+  globalAppsPath,
+  iconsPath,
+  scriptsPath,
+} from "../../model";
 import { getLaunchers } from "./getLaunchers";
 import { launcherCommand } from "./launcherCommand";
 import { fetchLauncherIcon, fetchLaunchers } from "./launcherSGDB";
@@ -24,12 +30,12 @@ const generateScript = (launcher: ILauncher) => {
 };
 
 const saveIcon = (path: string, launcher: ILauncher) => {
-  fs.writeFileSync(
+  fs.writeFile(
     `${appsPath}/${launcher.name}.desktop`,
     `[Desktop Entry]\nName=${
       launcher.name
     }\nExec=\"${`${scriptsPath}/${launcher.info.category}/${launcher.name}.sh`}\"\nType=Application\nIcon=${path}`
-  );
+  ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 };
 
 const generateDesktop = (launcher: ILauncher) => {
@@ -39,15 +45,13 @@ const generateDesktop = (launcher: ILauncher) => {
     fetchLauncherIcon(games.data[0].id).then((icons) => {
       cd(iconsPath);
 
-      icons.data.length > 0 &&
+      if (icons.data.length > 0) {
         $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
-          const iconPath =
-            icons.data.length > 0
-              ? `${iconsPath}/${launcher.name}.ico`
-              : "gamehub";
-
-          saveIcon(iconPath, launcher);
+          saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
         });
+      } else {
+        saveIcon("gamehub", launcher);
+      }
     })
   );
 };

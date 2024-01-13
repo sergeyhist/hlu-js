@@ -23936,6 +23936,7 @@ var steamProtonList = ["1580130", "1493710", "1887720", "1420170"];
 var gpuVersion = $`lspci | grep VGA`;
 var userPath = default6.homedir + "/.local/share/Hist";
 var appsPath = default6.homedir + "/.local/share/applications/HLU";
+var globalAppsPath = default6.homedir + "/.local/share/applications/";
 var scriptsPath = userPath + "/Scripts";
 var iconsPath = userPath + "/Icons";
 var packagesPath = userPath + "/Packages";
@@ -25067,15 +25068,24 @@ var launcherInfo = async () => {
 
 // src/utils/launcher/launcherRemover.ts
 var launcherRemover = async () => {
-  let launchers = getLaunchers();
-  let launcher = await generalSelector({ type: "launchers", list: launchers });
+  const launchers = getLaunchers();
+  const launcher = await generalSelector({
+    type: "launchers",
+    list: launchers
+  });
   const launcherInfo2 = JSON.parse(launcher.split("///")[1]);
-  launchers.splice(+launcher.split("///")[0], 1);
-  import_fs_extra.default.outputJsonSync(userPath + "/launchers.json", launchers, { spaces: 2 });
-  import_fs_extra.default.removeSync(`${appsPath}/${launcherInfo2.name}.desktop`);
-  import_fs_extra.default.removeSync(
+  const removeOption = await listSelector({
+    name: "Choose remove option:",
+    items: ["All", "Script", "Desktop file"]
+  });
+  if (["1"].includes(removeOption.toString())) {
+    launchers.splice(+launcher.split("///")[0], 1);
+    import_fs_extra.default.outputJsonSync(userPath + "/launchers.json", launchers, { spaces: 2 });
+  }
+  ["1", "2"].includes(removeOption.toString()) && import_fs_extra.default.removeSync(
     `${scriptsPath}/${launcherInfo2.info.category}/${launcherInfo2.name}.sh`
   );
+  ["1", "3"].includes(removeOption.toString()) && import_fs_extra.default.remove(`${appsPath}/${launcherInfo2.name}.desktop`).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 };
 
 // src/utils/launcher/launcherSGDB.ts
@@ -25105,24 +25115,27 @@ var generateScript = (launcher) => {
   );
 };
 var saveIcon = (path2, launcher) => {
-  import_fs_extra.default.writeFileSync(
+  import_fs_extra.default.writeFile(
     `${appsPath}/${launcher.name}.desktop`,
     `[Desktop Entry]
 Name=${launcher.name}
 Exec="${`${scriptsPath}/${launcher.info.category}/${launcher.name}.sh`}"
 Type=Application
 Icon=${path2}`
-  );
+  ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 };
 var generateDesktop = (launcher) => {
   generateScript(launcher);
   fetchLaunchers(launcher.name).then(
     (games) => fetchLauncherIcon(games.data[0].id).then((icons) => {
       cd(iconsPath);
-      icons.data.length > 0 && $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
-        const iconPath = icons.data.length > 0 ? `${iconsPath}/${launcher.name}.ico` : "gamehub";
-        saveIcon(iconPath, launcher);
-      });
+      if (icons.data.length > 0) {
+        $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
+          saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
+        });
+      } else {
+        saveIcon("gamehub", launcher);
+      }
     })
   );
 };
@@ -25993,7 +26006,7 @@ var mainProcess = async () => {
           "Create launcher",
           "Edit launcher",
           "Run launcher",
-          "Delete launcher",
+          "Delete launcher/script/desktop file",
           "Generate bash scripts",
           "Generate desktop files",
           "Display information"

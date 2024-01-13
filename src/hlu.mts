@@ -53,8 +53,6 @@ process.on("uncaughtException", async (err, origin) => {
 
 const cwd = process.cwd();
 
-// fetchLaunchers("pcsx2").then(response => fetchLauncherIcon(response.data[0].id).then(data => console.log(data)));
-
 const mainProcess = async () => {
   ensurePaths();
 
@@ -96,7 +94,7 @@ const mainProcess = async () => {
             "Create launcher",
             "Edit launcher",
             "Run launcher",
-            "Delete launcher",
+            "Delete launcher/script/desktop file",
             "Generate bash scripts",
             "Generate desktop files",
             "Display information",
@@ -137,10 +135,10 @@ const mainProcess = async () => {
           await launcherRemover();
           break;
         case "5":
-          await launcherGenerator('script');
+          await launcherGenerator("script");
           break;
         case "6":
-          await launcherGenerator('icon');
+          await launcherGenerator("icon");
           break;
         case "7":
           await launcherInfo();

@@ -1,6 +1,6 @@
 import { spawnSync } from "child_process";
 import { chalk } from "zx";
-import {flags} from "../model";
+import { flags } from "../model";
 import { generalInput } from "./input";
 
 export const scriptExit = async () => {

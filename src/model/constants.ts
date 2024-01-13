@@ -21,6 +21,7 @@ export const gpuVersion = $`lspci | grep VGA`;
 
 export const userPath = os.homedir + "/.local/share/Hist";
 export const appsPath = os.homedir + "/.local/share/applications/HLU";
+export const globalAppsPath = os.homedir + "/.local/share/applications/";
 export const scriptsPath = userPath + "/Scripts";
 export const iconsPath = userPath + "/Icons";
 export const packagesPath = userPath + "/Packages";

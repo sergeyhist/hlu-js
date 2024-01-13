@@ -1,4 +1,5 @@
 # Hist Linux Utilities (NodeJS Version)
+
 ## Requirements:
 
 - [nodejs](https://nodejs.org/en)
@@ -42,65 +43,68 @@ and run from terminal
 `hlu.mjs`
 
 ## Features:
+
 ### Launcher Controller:
 
 - Create, edit, run or delete launcher for wine game/app, linux native game/app, legendary(epic games) game or retroarch game.  
   Launcher settings:
   - Main settings
-    + Name
-    + Category
-    + Prefix (wine/proton/legendary)
-    + Core (retroarch)
-    + Select wine/proton version (wine/proton/legendary)
-    + Add additional arguments/commands
-    + Enable gamemode, mangohud, vkbasalt
-    + Enable pulse audio latency
-    + Enable debug (~/.local/share/Hist/.logs)
+    - Name
+    - Category
+    - Prefix (wine/proton/legendary)
+    - Core (retroarch)
+    - Select wine/proton version (wine/proton/legendary)
+    - Add additional arguments/commands
+    - Enable gamemode, mangohud, vkbasalt
+    - Enable pulse audio latency
+    - Enable debug (~/.local/share/Hist/.logs)
   - Libstrangle settings
-    + Enable libstrangle
-    + Set max framerate
-    + Set max framerate for battery power
-    + Enable Vsync
-    + Run glFinish after every frame
-    + Set mip-map LoD bias
-    + Set anisotropic filtering level (Vulkan only)
-    + Enable force trilinear filtering (Vulkan only)
-    + Disable linear texture filtering (Vulkan only)
-    + Disable dlsym hooking
-    + Stop strangle OpenGL libs from loading
-    + Enable the implicit Vulkan layer
-    + Disable the implicit Vulkan layer
+    - Enable libstrangle
+    - Set max framerate
+    - Set max framerate for battery power
+    - Enable Vsync
+    - Run glFinish after every frame
+    - Set mip-map LoD bias
+    - Set anisotropic filtering level (Vulkan only)
+    - Enable force trilinear filtering (Vulkan only)
+    - Disable linear texture filtering (Vulkan only)
+    - Disable dlsym hooking
+    - Stop strangle OpenGL libs from loading
+    - Enable the implicit Vulkan layer
+    - Disable the implicit Vulkan layer
   - FSR settings
-    + Enable wine FSR
-    + Select FSR Strength
+    - Enable wine FSR
+    - Select FSR Strength
   - DXVK settings
-    + Enable DxvkHUD
-    + Enable Dxvk async
-    + Disable State Cache
+    - Enable DxvkHUD
+    - Enable Dxvk async
+    - Disable State Cache
   - Wine settings
-    + Enable FSYNC
-    + Enable ESYNC
-    + Enable WineD3D
-    + Enable virtual desktop
+    - Enable FSYNC
+    - Enable ESYNC
+    - Enable WineD3D
+    - Enable virtual desktop
   - Proton settings
-    + Enable wined3d
-    + Enable large address aware
-    + Enable old GL string
-    + Enable Seccomp
-    + Disable D3D12
-    + Disable D3D11
-    + Disable D3D10
-    + Disable D3D9
-    + Disable ESYNC
-    + Disable FSYNC
-    + Disable FUTEX2
+    - Enable wined3d
+    - Enable large address aware
+    - Enable old GL string
+    - Enable Seccomp
+    - Disable D3D12
+    - Disable D3D11
+    - Disable D3D10
+    - Disable D3D9
+    - Disable ESYNC
+    - Disable FSYNC
+    - Disable FUTEX2
   - Nvidia settings
-    + Enable threaded optimizations
-    + Enable graphics API visual indicator
+    - Enable threaded optimizations
+    - Enable graphics API visual indicator
   - AMD settings
-    + Enable threaded optimizations
-    + Enable radeon ACO vulkan compiler
-- Generate bash scripts from launchers list. Scripts are located in **~/.local/share/Hist/Scripts** directory and sorted by categories.
+    - Enable threaded optimizations
+    - Enable radeon ACO vulkan compiler
+- Generate bash scripts and desktop files for launchers.  
+  Scripts are located in the **~/.local/share/Hist/Scripts** directory and sorted by categories.  
+  Desktop files are located in the **~/.local/share/applications/HLU** directory.
 - Display information about launcher in terminal.
 
 ### Wine/Proton Helper:
@@ -108,18 +112,18 @@ and run from terminal
 - Prefix commands (winecfg, control, regedit, etc.)
 - Winetricks (only for wine prefixes)
 - Prefix manager
-  + Add prefix
-  + Create prefix (only for wine prefixes)
-  + Delete prefix
-  + Install DXVK (only for wine prefixes)
-  + Install VKD3D (only for wine prefixes)
-  + Install MF (only for wine prefixes)
-  + Install MF-Cab (only for wine prefixes)
+  - Add prefix
+  - Create prefix (only for wine prefixes)
+  - Delete prefix
+  - Install DXVK (only for wine prefixes)
+  - Install VKD3D (only for wine prefixes)
+  - Install MF (only for wine prefixes)
+  - Install MF-Cab (only for wine prefixes)
 - Runners manager
-  + Add wine runner
-  + Delete wine runner
-  + Install GE-Proton
-  + Install GE-Wine
+  - Add wine runner
+  - Delete wine runner
+  - Install GE-Proton
+  - Install GE-Wine
 
 ### Legendary(Epic Games) Helper:
 
@@ -143,13 +147,13 @@ and run from terminal
 ### Systemd Controller
 
 - Services list
-  + Start
-  + Stop
-  + Restart
-  + Enable
-  + Disable
-  + Status
-  + Unlist
+  - Start
+  - Stop
+  - Restart
+  - Enable
+  - Disable
+  - Status
+  - Unlist
 - Add service to the list
 
 ### Launch options for steam game
