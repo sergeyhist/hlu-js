@@ -25194,13 +25194,14 @@ var ensurePaths = async () => {
   import_fs_extra.default.ensureDirSync(appsPath);
   import_fs_extra.default.ensureDirSync(iconsPath);
   import_fs_extra.default.ensureDirSync(scriptsPath);
-  import_fs_extra.default.writeFileSync(
+  !import_fs_extra.default.existsSync(`${userPath}/HLU.png`) && await $`cd ${userPath}; wget https://raw.githubusercontent.com/sergeyhist/hlu-js/main/images/HLU.png`;
+  import_fs_extra.default.writeFile(
     `${appsPath}/HLU.desktop`,
     `[Desktop Entry]
 Name=HLU
 Exec=${__filename}
 Type=Application
-Icon=terminal
+Icon=${userPath}/HLU.png
 Terminal=true
 Actions=Launchers;Services;
 
@@ -25211,7 +25212,7 @@ Exec=${__filename} run
 [Desktop Action Services]
 Name=Services
 Exec=${__filename} services`
-  );
+  ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
   if (!import_fs_extra.default.existsSync(userPath + "/settings.json") || !import_fs_extra.default.existsSync(userPath + "/packages.json")) {
     cd(userPath);
     await $`git clone https://github.com/sergeyhist/hlu-js.git`;

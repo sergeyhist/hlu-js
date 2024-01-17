@@ -1,6 +1,7 @@
 import { $, cd, chalk, fs, globby, os, path } from "zx";
 import {
   appsPath,
+  globalAppsPath,
   historyPath,
   iconsPath,
   ILauncherSettings,
@@ -34,10 +35,13 @@ export const ensurePaths = async () => {
   fs.ensureDirSync(iconsPath);
   fs.ensureDirSync(scriptsPath);
 
-  fs.writeFileSync(
+  !fs.existsSync(`${userPath}/HLU.png`) &&
+    (await $`cd ${userPath}; wget https://raw.githubusercontent.com/sergeyhist/hlu-js/main/images/HLU.png`);
+
+  fs.writeFile(
     `${appsPath}/HLU.desktop`,
-    `[Desktop Entry]\nName=HLU\nExec=${__filename}\nType=Application\nIcon=terminal\nTerminal=true\nActions=Launchers;Services;\n\n[Desktop Action Launchers]\nName=Launchers\nExec=${__filename} run\n\n[Desktop Action Services]\nName=Services\nExec=${__filename} services`
-  );
+    `[Desktop Entry]\nName=HLU\nExec=${__filename}\nType=Application\nIcon=${userPath}/HLU.png\nTerminal=true\nActions=Launchers;Services;\n\n[Desktop Action Launchers]\nName=Launchers\nExec=${__filename} run\n\n[Desktop Action Services]\nName=Services\nExec=${__filename} services`
+  ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 
   if (
     !fs.existsSync(userPath + "/settings.json") ||
