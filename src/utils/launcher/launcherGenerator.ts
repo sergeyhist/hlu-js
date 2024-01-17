@@ -42,17 +42,17 @@ const generateDesktop = (launcher: ILauncher) => {
   generateScript(launcher);
 
   fetchLaunchers(launcher.name).then((games) =>
-    fetchLauncherIcon(games.data[0].id).then((icons) => {
-      cd(iconsPath);
+    !!games?.data[0]?.id
+      ? fetchLauncherIcon(games.data[0].id).then((icons) => {
+          cd(iconsPath);
 
-      if (icons.data.length > 0) {
-        $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
-          saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
-        });
-      } else {
-        saveIcon("gamehub", launcher);
-      }
-    })
+          if (icons.data.length > 0) {
+            $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
+              saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
+            });
+          }
+        })
+      : saveIcon("gamehub", launcher)
   );
 };
 

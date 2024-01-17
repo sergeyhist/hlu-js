@@ -1,7 +1,7 @@
 {
   "name": "hlu",
   "description": "Hist Linux Utilities (NodeJS Version)",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "src/hlu.mts",
   "repository": {
     "type": "git",

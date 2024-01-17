@@ -25127,16 +25127,17 @@ Icon=${path2}`
 var generateDesktop = (launcher) => {
   generateScript(launcher);
   fetchLaunchers(launcher.name).then(
-    (games) => fetchLauncherIcon(games.data[0].id).then((icons) => {
-      cd(iconsPath);
-      if (icons.data.length > 0) {
-        $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
-          saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
-        });
-      } else {
-        saveIcon("gamehub", launcher);
-      }
-    })
+    (games) => {
+      var _a;
+      return !!((_a = games == null ? void 0 : games.data[0]) == null ? void 0 : _a.id) ? fetchLauncherIcon(games.data[0].id).then((icons) => {
+        cd(iconsPath);
+        if (icons.data.length > 0) {
+          $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
+            saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
+          });
+        }
+      }) : saveIcon("gamehub", launcher);
+    }
   );
 };
 var launcherGenerator = async (type) => {
