@@ -5,6 +5,7 @@ import {
   globalAppsPath,
   iconsPath,
   scriptsPath,
+  userPath,
 } from "../../model";
 import { getLaunchers } from "./getLaunchers";
 import { launcherCommand } from "./launcherCommand";
@@ -52,7 +53,7 @@ const generateDesktop = (launcher: ILauncher) => {
             });
           }
         })
-      : saveIcon("gamehub", launcher)
+      : saveIcon(`${userPath}/HLU.png`, launcher)
   );
 };
 

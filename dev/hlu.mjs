@@ -25136,7 +25136,7 @@ var generateDesktop = (launcher) => {
             saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
           });
         }
-      }) : saveIcon("gamehub", launcher);
+      }) : saveIcon(`${userPath}/HLU.png`, launcher);
     }
   );
 };
