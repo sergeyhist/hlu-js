@@ -30,14 +30,55 @@ export const historyPath = userPath + "/.history";
 export const logsPath = userPath + "/.logs";
 export const protonPath = userPath + "/.proton";
 
+if (!fs.existsSync(userPath + "/prefixes.json")) {
+  fs.outputJsonSync(
+    userPath + "/prefixes.json",
+    {
+      wine: [
+        {
+          name: "Default",
+          path: os.homedir + "/.wine",
+        },
+      ],
+      proton: [
+        {
+          name: "Default",
+          path: protonPath,
+        },
+      ],
+    },
+    {
+      spaces: 2,
+    }
+  );
+}
+
+if (!fs.existsSync(userPath + "/runners.json")) {
+  fs.outputJsonSync(
+    userPath + "/runners.json",
+    {
+      wine: [
+        {
+          name: "Default",
+          path: "/usr/bin/wine",
+        },
+      ],
+      proton: [],
+    },
+    {
+      spaces: 2,
+    }
+  );
+}
+
 export const wineList: IWineList = {
-  prefixes: fs.readJsonSync(userPath + '/prefixes.json').wine,
-  runners: fs.readJsonSync(userPath + '/runners.json').wine,
+  prefixes: fs.readJsonSync(userPath + "/prefixes.json").wine,
+  runners: fs.readJsonSync(userPath + "/runners.json").wine,
 };
 
 export const protonList: IWineList = {
-  prefixes: fs.readJsonSync(userPath + '/prefixes.json').proton,
-  runners: fs.readJsonSync(userPath + '/runners.json').proton,
+  prefixes: fs.readJsonSync(userPath + "/prefixes.json").proton,
+  runners: fs.readJsonSync(userPath + "/runners.json").proton,
 };
 
 export const steamApps: ISteamList = {

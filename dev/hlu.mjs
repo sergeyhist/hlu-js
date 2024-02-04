@@ -1185,9 +1185,9 @@ var require_path = __commonJS({
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.convertPosixPathToPattern = exports.convertWindowsPathToPattern = exports.convertPathToPattern = exports.escapePosixPath = exports.escapeWindowsPath = exports.escape = exports.removeLeadingDotSegment = exports.makeAbsolute = exports.unixify = void 0;
-    var os2 = __require("os");
+    var os3 = __require("os");
     var path2 = __require("path");
-    var IS_WINDOWS_PLATFORM = os2.platform() === "win32";
+    var IS_WINDOWS_PLATFORM = os3.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
     var WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()[\]{}]|^!|[!+@](?=\())/g;
@@ -6319,8 +6319,8 @@ var require_settings4 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
     var fs4 = __require("fs");
-    var os2 = __require("os");
-    var CPU_COUNT = Math.max(os2.cpus().length, 1);
+    var os3 = __require("os");
+    var CPU_COUNT = Math.max(os3.cpus().length, 1);
     exports.DEFAULT_FILE_SYSTEM_ADAPTER = {
       lstat: fs4.lstat,
       lstatSync: fs4.lstatSync,
@@ -23944,6 +23944,45 @@ var releasesPath = userPath + "/Packages/Releases";
 var historyPath = userPath + "/.history";
 var logsPath = userPath + "/.logs";
 var protonPath = userPath + "/.proton";
+if (!import_fs_extra.default.existsSync(userPath + "/prefixes.json")) {
+  import_fs_extra.default.outputJsonSync(
+    userPath + "/prefixes.json",
+    {
+      wine: [
+        {
+          name: "Default",
+          path: default6.homedir + "/.wine"
+        }
+      ],
+      proton: [
+        {
+          name: "Default",
+          path: protonPath
+        }
+      ]
+    },
+    {
+      spaces: 2
+    }
+  );
+}
+if (!import_fs_extra.default.existsSync(userPath + "/runners.json")) {
+  import_fs_extra.default.outputJsonSync(
+    userPath + "/runners.json",
+    {
+      wine: [
+        {
+          name: "Default",
+          path: "/usr/bin/wine"
+        }
+      ],
+      proton: []
+    },
+    {
+      spaces: 2
+    }
+  );
+}
 var wineList = {
   prefixes: import_fs_extra.default.readJsonSync(userPath + "/prefixes.json").wine,
   runners: import_fs_extra.default.readJsonSync(userPath + "/runners.json").wine
@@ -25220,45 +25259,6 @@ Exec=${__filename} services`
     import_fs_extra.default.copySync("hlu-js/packages.json", userPath + "/packages.json");
     import_fs_extra.default.removeSync("hlu-js");
   }
-  if (!import_fs_extra.default.existsSync(userPath + "/prefixes.json")) {
-    import_fs_extra.default.outputJsonSync(
-      userPath + "/prefixes.json",
-      {
-        wine: [
-          {
-            name: "Default",
-            path: default6.homedir + "/.wine"
-          }
-        ],
-        proton: [
-          {
-            name: "Default",
-            path: protonPath
-          }
-        ]
-      },
-      {
-        spaces: 2
-      }
-    );
-  }
-  if (!import_fs_extra.default.existsSync(userPath + "/runners.json")) {
-    import_fs_extra.default.outputJsonSync(
-      userPath + "/runners.json",
-      {
-        wine: [
-          {
-            name: "Default",
-            path: "/usr/bin/wine"
-          }
-        ],
-        proton: []
-      },
-      {
-        spaces: 2
-      }
-    );
-  }
 };
 var getExecutable = async ({
   ext,
@@ -25978,7 +25978,7 @@ process.on("uncaughtException", async (err, origin) => {
 });
 var cwd = process.cwd();
 var mainProcess = async () => {
-  ensurePaths();
+  await ensurePaths();
   if (process.argv[3] == "run") {
     return await launcherRunner();
   }

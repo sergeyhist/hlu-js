@@ -53,45 +53,6 @@ export const ensurePaths = async () => {
     fs.copySync("hlu-js/packages.json", userPath + "/packages.json");
     fs.removeSync("hlu-js");
   }
-  if (!fs.existsSync(userPath + "/prefixes.json")) {
-    fs.outputJsonSync(
-      userPath + "/prefixes.json",
-      {
-        wine: [
-          {
-            name: "Default",
-            path: os.homedir + "/.wine",
-          },
-        ],
-        proton: [
-          {
-            name: "Default",
-            path: protonPath,
-          },
-        ],
-      },
-      {
-        spaces: 2,
-      }
-    );
-  }
-  if (!fs.existsSync(userPath + "/runners.json")) {
-    fs.outputJsonSync(
-      userPath + "/runners.json",
-      {
-        wine: [
-          {
-            name: "Default",
-            path: "/usr/bin/wine",
-          },
-        ],
-        proton: [],
-      },
-      {
-        spaces: 2,
-      }
-    );
-  }
 };
 
 interface IGetExecutableArguments {

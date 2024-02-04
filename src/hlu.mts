@@ -4,7 +4,6 @@ import { $, cd, chalk, fs, os } from "zx";
 import {
   listSelector,
   scriptExit,
-  ensurePaths,
   launcherInit,
   steamListInit,
   retroarchListInit,
@@ -21,6 +20,7 @@ import {
   updater,
   steamOptions,
   systemdController,
+  ensurePaths,
 } from "./utils";
 import { flags } from "./model";
 import { legendaryHelper } from "./utils/legendary";
@@ -54,7 +54,7 @@ process.on("uncaughtException", async (err, origin) => {
 const cwd = process.cwd();
 
 const mainProcess = async () => {
-  ensurePaths();
+  await ensurePaths();
 
   if (process.argv[3] == "run") {
     return await launcherRunner();
