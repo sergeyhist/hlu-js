@@ -1,11 +1,13 @@
 import { $, cd, chalk, fs, globby, os, path } from "zx";
 import {
   appsPath,
+  dirsPath,
   globalAppsPath,
   historyPath,
   iconsPath,
   ILauncherSettings,
   logsPath,
+  menusPath,
   packagesPath,
   protonPath,
   releasesPath,
@@ -32,15 +34,29 @@ export const ensurePaths = async () => {
   fs.ensureDirSync(logsPath);
   fs.ensureDirSync(protonPath);
   fs.ensureDirSync(appsPath);
+  fs.ensureDirSync(dirsPath);
+  fs.ensureDirSync(menusPath);
   fs.ensureDirSync(iconsPath);
   fs.ensureDirSync(scriptsPath);
 
   !fs.existsSync(`${userPath}/HLU.png`) &&
     (await $`cd ${userPath}; wget https://raw.githubusercontent.com/sergeyhist/hlu-js/main/images/HLU.png`);
 
+  !fs.existsSync(`${dirsPath}/hlu.directory`) &&
+    fs.writeFileSync(
+      `${dirsPath}/hlu.directory`,
+      `[Desktop Entry]\nType=Directory\nName=HLU\nIcon=${userPath}/HLU.png`
+    );
+
+  !fs.existsSync(`${menusPath}/hlu.menu`) &&
+    fs.writeFileSync(
+      `${menusPath}/hlu.menu`,
+      `<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"\n"http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">\n<Menu>\n<Name>Applications</Name>\n<Menu>\n<Name>HLU</Name>\n<Directory>hlu.directory</Directory>\n<Include>\n<Category>HLU</Category>\n</Include>\n</Menu>\n</Menu>`
+    );
+
   fs.writeFile(
     `${appsPath}/HLU.desktop`,
-    `[Desktop Entry]\nName=HLU\nExec=${__filename}\nType=Application\nIcon=${userPath}/HLU.png\nTerminal=true\nActions=Launchers;Services;\n\n[Desktop Action Launchers]\nName=Launchers\nExec=${__filename} run\n\n[Desktop Action Services]\nName=Services\nExec=${__filename} services`
+    `[Desktop Entry]\nName=HLU\nExec=${__filename}\nType=Application\nIcon=${userPath}/HLU.png\nTerminal=true\mCategories=HLU;Games;\nActions=Launchers;Services;\n\n[Desktop Action Launchers]\nName=Launchers\nExec=${__filename} run\n\n[Desktop Action Services]\nName=Services\nExec=${__filename} services`
   ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 
   if (

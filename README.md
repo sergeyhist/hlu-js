@@ -7,6 +7,8 @@
 - [wine](https://www.winehq.org)
 - [winetricks](https://github.com/Winetricks/winetricks)
 - [wget](https://www.gnu.org/software/wget)
+- [mingw-w64-gcc](https://www.mingw-w64.org/) (optional)  
+- [meson](https://mesonbuild.com/) (optional)  
 - [retroarch](https://www.retroarch.com) (optional)
 - [legendary](https://github.com/derrod/legendary) (optional)
 

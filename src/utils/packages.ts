@@ -201,7 +201,7 @@ export const packageInstaller = async ({ type, pack }: IInstallerArguments) => {
       }
       break;
     case "release":
-      if (fs.existsSync(userPath + "/" + packages.release[pack].git_name)) {
+      if (fs.existsSync(releasesPath + "/" + packages.release[pack].git_name)) {
         switch (
           await generalInput({
             qstring:

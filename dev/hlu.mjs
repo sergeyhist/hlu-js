@@ -23936,6 +23936,8 @@ var steamProtonList = ["1580130", "1493710", "1887720", "1420170"];
 var gpuVersion = $`lspci | grep VGA`;
 var userPath = default6.homedir + "/.local/share/Hist";
 var appsPath = default6.homedir + "/.local/share/applications/HLU";
+var dirsPath = default6.homedir + "/.local/share/desktop-directories";
+var menusPath = default6.homedir + "/.config/menus/applications-merged";
 var globalAppsPath = default6.homedir + "/.local/share/applications/";
 var scriptsPath = userPath + "/Scripts";
 var iconsPath = userPath + "/Icons";
@@ -25160,7 +25162,8 @@ var saveIcon = (path2, launcher) => {
 Name=${launcher.name}
 Exec="${`${scriptsPath}/${launcher.info.category}/${launcher.name}.sh`}"
 Type=Application
-Icon=${path2}`
+Icon=${path2}
+Categories=HLU;Games;`
   ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 };
 var generateDesktop = (launcher) => {
@@ -25231,9 +25234,33 @@ var ensurePaths = async () => {
   import_fs_extra.default.ensureDirSync(logsPath);
   import_fs_extra.default.ensureDirSync(protonPath);
   import_fs_extra.default.ensureDirSync(appsPath);
+  import_fs_extra.default.ensureDirSync(dirsPath);
+  import_fs_extra.default.ensureDirSync(menusPath);
   import_fs_extra.default.ensureDirSync(iconsPath);
   import_fs_extra.default.ensureDirSync(scriptsPath);
   !import_fs_extra.default.existsSync(`${userPath}/HLU.png`) && await $`cd ${userPath}; wget https://raw.githubusercontent.com/sergeyhist/hlu-js/main/images/HLU.png`;
+  !import_fs_extra.default.existsSync(`${dirsPath}/hlu.directory`) && import_fs_extra.default.writeFileSync(
+    `${dirsPath}/hlu.directory`,
+    `[Desktop Entry]
+Type=Directory
+Name=HLU
+Icon=${userPath}/HLU.png`
+  );
+  !import_fs_extra.default.existsSync(`${menusPath}/hlu.menu`) && import_fs_extra.default.writeFileSync(
+    `${menusPath}/hlu.menu`,
+    `<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+"http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+<Menu>
+<Name>Applications</Name>
+<Menu>
+<Name>HLU</Name>
+<Directory>hlu.directory</Directory>
+<Include>
+<Category>HLU</Category>
+</Include>
+</Menu>
+</Menu>`
+  );
   import_fs_extra.default.writeFile(
     `${appsPath}/HLU.desktop`,
     `[Desktop Entry]
@@ -25241,7 +25268,7 @@ Name=HLU
 Exec=${__filename}
 Type=Application
 Icon=${userPath}/HLU.png
-Terminal=true
+Terminal=truemCategories=HLU;Games;
 Actions=Launchers;Services;
 
 [Desktop Action Launchers]
@@ -25552,7 +25579,7 @@ var packageInstaller = async ({ type, pack }) => {
       }
       break;
     case "release":
-      if (import_fs_extra.default.existsSync(userPath + "/" + packages.release[pack].git_name)) {
+      if (import_fs_extra.default.existsSync(releasesPath + "/" + packages.release[pack].git_name)) {
         switch (await generalInput({
           qstring: "Download another " + source_default.green("release package") + " ? " + source_default.cyan("y|N")
         })) {
@@ -25669,13 +25696,13 @@ var prefixManager = async ({ type }) => {
         case "1":
           await packageInstaller({ type: "git", pack: "DXVK" });
           verboseBash(
-            `WINEPREFIX=${prefix}; cp ${releasesPath}/dxvk/x64/*.dll $WINEPREFIX/drive_c/windows/system32; cp ${releasesPath}/dxvk/x32/*.dll $WINEPREFIX/drive_c/windows/syswow64; ${runner}boot -u`
+            `cp ${packagesPath}/dxvk/dlls/dxvk-master/x64/*.dll ${prefix}/drive_c/windows/system32; cp ${packagesPath}/dxvk/dlls/dxvk-master/x32/*.dll ${prefix}/drive_c/windows/syswow64; WINEPREFIX="${prefix}" "${runner}" wineboot -u`
           );
           break;
         case "2":
           await packageInstaller({ type: "release", pack: "DXVK" });
           verboseBash(
-            `WINEPREFIX=${prefix}; cp ${releasesPath}/dxvk/x64/*.dll $WINEPREFIX/drive_c/windows/system32; cp ${releasesPath}/dxvk/x32/*.dll $WINEPREFIX/drive_c/windows/syswow64; ${runner}boot -u`
+            `cp ${releasesPath}/dxvk/x64/*.dll ${prefix}/drive_c/windows/system32; cp ${releasesPath}/dxvk/x32/*.dll ${prefix}/drive_c/windows/syswow64; WINEPREFIX="${prefix}" "${runner}" wineboot -u`
           );
           break;
       }

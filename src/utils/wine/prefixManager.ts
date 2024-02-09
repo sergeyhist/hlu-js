@@ -134,14 +134,14 @@ export const prefixManager = async ({ type }: IArguments) => {
           await packageInstaller({ type: "git", pack: "DXVK" });
 
           verboseBash(
-            `WINEPREFIX=${prefix}; cp ${releasesPath}/dxvk/x64/*.dll $WINEPREFIX/drive_c/windows/system32; cp ${releasesPath}/dxvk/x32/*.dll $WINEPREFIX/drive_c/windows/syswow64; ${runner}boot -u`
+            `cp ${packagesPath}/dxvk/dlls/dxvk-master/x64/*.dll ${prefix}/drive_c/windows/system32; cp ${packagesPath}/dxvk/dlls/dxvk-master/x32/*.dll ${prefix}/drive_c/windows/syswow64; WINEPREFIX=\"${prefix}\" \"${runner}\" wineboot -u`
           );
           break;
         case "2":
           await packageInstaller({ type: "release", pack: "DXVK" });
 
           verboseBash(
-            `WINEPREFIX=${prefix}; cp ${releasesPath}/dxvk/x64/*.dll $WINEPREFIX/drive_c/windows/system32; cp ${releasesPath}/dxvk/x32/*.dll $WINEPREFIX/drive_c/windows/syswow64; ${runner}boot -u`
+            `cp ${releasesPath}/dxvk/x64/*.dll ${prefix}/drive_c/windows/system32; cp ${releasesPath}/dxvk/x32/*.dll ${prefix}/drive_c/windows/syswow64; WINEPREFIX=\"${prefix}\" \"${runner}\" wineboot -u`
           );
           break;
       }
