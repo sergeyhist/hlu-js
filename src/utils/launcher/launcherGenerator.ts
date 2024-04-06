@@ -21,7 +21,7 @@ const generateScript = (launcher: ILauncher) => {
 
   fs.writeFileSync(
     scriptsPath + "/" + launcher.info.category + "/" + launcher.name + ".sh",
-    "#!/bin/bash\n" + command.join("\n")
+    "#!/bin/bash\n" + command
   );
 
   fs.chmod(

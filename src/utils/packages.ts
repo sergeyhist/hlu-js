@@ -190,9 +190,11 @@ export const packageInstaller = async ({ type, pack }: IInstallerArguments) => {
         cd(packagesPath);
 
         if (packages.git[pack].url_args) {
-          await $`git clone ${packages.git[pack].url_args} ${packages.git[pack].url}`;
+          await verboseBash(
+            `git clone ${packages.git[pack].url_args} ${packages.git[pack].url}`
+          );
         } else {
-          await $`git clone ${packages.git[pack].url}`;
+          await verboseBash(`git clone ${packages.git[pack].url}`);
         }
 
         cd(path.basename(packages.git[pack].url, ".git"));

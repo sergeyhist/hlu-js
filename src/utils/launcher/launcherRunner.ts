@@ -8,5 +8,5 @@ export const launcherRunner = async () => {
   let launcher = await generalSelector({ type: "launchers", list: launchers });
   let commands = launcherCommand(JSON.parse(launcher.split("///")[1]));
 
-  await verboseBash(commands.join("; "));
+  await verboseBash(commands);
 };
