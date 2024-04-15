@@ -51,6 +51,8 @@ const generateDesktop = (launcher: ILauncher) => {
             $`wget ${icons.data[0].thumb} -O ${launcher.name}.ico`.then(() => {
               saveIcon(`${iconsPath}/${launcher.name}.ico`, launcher);
             });
+          } else {
+            saveIcon(`${userPath}/HLU.png`, launcher);
           }
         })
       : saveIcon(`${userPath}/HLU.png`, launcher)

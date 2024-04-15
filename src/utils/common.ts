@@ -55,7 +55,7 @@ export const ensurePaths = async () => {
     );
 
   fs.writeFile(
-    `${appsPath}/HLU.desktop`,
+    `${appsPath.split("/").slice(0, -1).join("/")}/HLU.desktop`,
     `[Desktop Entry]\nName=HLU\nExec=${__filename}\nType=Application\nIcon=${userPath}/HLU.png\nTerminal=true\mCategories=HLU;Games;\nActions=Launchers;Services;\n\n[Desktop Action Launchers]\nName=Launchers\nExec=${__filename} run\n\n[Desktop Action Services]\nName=Services\nExec=${__filename} services`
   ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 
