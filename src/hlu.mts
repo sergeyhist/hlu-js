@@ -22,7 +22,7 @@ import {
   systemdController,
   ensurePaths,
 } from "./utils";
-import { flags } from "./model";
+import { flags, userPath } from "./model";
 import { legendaryHelper } from "./utils/legendary";
 
 $.verbose = false;
@@ -54,6 +54,7 @@ process.on("uncaughtException", async (err, origin) => {
 const cwd = process.cwd();
 
 const mainProcess = async () => {
+  cd(userPath)
   await ensurePaths();
 
   if (process.argv[3] == "run") {

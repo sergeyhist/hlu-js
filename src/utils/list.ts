@@ -243,12 +243,12 @@ export const retroarchListInit = async () => {
     if (fs.existsSync(coresPath)) {
       cd(coresPath);
 
-      const cores = await globby("", {
+      const cores = await globby(coresPath, {
         expandDirectories: { extensions: ["so"] },
         absolute: true,
       });
 
-      cores.forEach((item) => {
+      cores?.forEach((item) => {
         if (infoPath) {
           coreName = getName(
             item.replace(coresPath, infoPath).replace(".so", ".info")
