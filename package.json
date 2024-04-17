@@ -1,7 +1,7 @@
 {
   "name": "hlu",
   "description": "Hist Linux Utilities (NodeJS Version)",
-  "version": "1.1.5",
+  "version": "1.1.7",
   "main": "src/hlu.mts",
   "repository": {
     "type": "git",
@@ -17,11 +17,11 @@
   },
   "homepage": "https://github.com/sergeyhist/hlu-js#readme",
   "dependencies": {
-    "typescript": "^5.2.2",
-    "zx": "^8.0.1"
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "tsup": "^7.2.0"
+    "tsup": "^7.2.0",
+    "zx": "^8.0.1"
   },
   "scripts": {
     "dev": "tsup src/hlu.mts --watch",
