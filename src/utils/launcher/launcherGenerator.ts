@@ -35,7 +35,7 @@ const saveIcon = (path: string, launcher: ILauncher) => {
     `${appsPath}/${launcher.name}.desktop`,
     `[Desktop Entry]\nName=${
       launcher.name
-    }\nExec=\"${`${scriptsPath}/${launcher.info.category}/${launcher.name}.sh`}\"\nType=Application\nIcon=${path}\nCategories=HLU;Games;`
+    }\nExec=\"${`${scriptsPath}/${launcher.info.category}/${launcher.name}.sh`}\"\nType=Application\nIcon=${path}\nCategories=HLU;Games;\nKeywords=HLU;`
   ).then(async () => await $`update-desktop-database "${globalAppsPath}"`);
 };
 

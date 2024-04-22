@@ -84,36 +84,46 @@ export const packageInstaller = async ({ type, pack }: IInstallerArguments) => {
       }),
     });
 
-    cd(releasesPath);
+    const packageName = path.basename(
+      release,
+      "." + packages.release[pack].extension
+    );
 
-    console.log("\n" + chalk.green("Downloading..."));
+    const packagePath = releasesPath + "/" + packageName;
 
-    await verboseBash(`wget ${release}`);
+    if (
+      !fs.existsSync(
+        releasesPath +
+          "/" +
+          packageName +
+          "." +
+          packages.release[pack].extension
+      )
+    ) {
+      cd(releasesPath);
+      console.log("\n" + chalk.green("Downloading..."));
+      await verboseBash(`wget ${release}`);
+    }
 
     if (packages.release[pack].flags?.includes("archive")) {
-      fs.emptyDirSync(
-        path.basename(release, "." + packages.release[pack].extension)
-      );
+      fs.emptyDirSync(packagePath);
+
       console.log("\n" + chalk.green("Extracting..."));
-      await $`tar -xf ${path.basename(release)} -C ${path.basename(
-        release,
-        "." + packages.release[pack].extension
-      )} --strip-components 1`;
+      await $`tar -xf ${
+        packagePath + "." + packages.release[pack].extension
+      } -C ${packagePath} --strip-components 1`;
       fs.removeSync(path.basename(release));
       console.log("\n" + chalk.green("Installing...") + "\n");
       if (packages.release[pack].flags?.includes("install")) {
         for (let folder of packages.release[pack].folders) {
           folder = folder
-            .replace("hlu_packspath", packagesPath)
-            .replace("home_dir", os.homedir + "");
+            .replaceAll("hlu_packspath", packagesPath)
+            .replaceAll("home_dir", os.homedir);
           if (fs.existsSync(folder)) {
             folder =
               folder + "/" + packages.release[pack].path.replace("name", pack);
             fs.removeSync(folder);
-            fs.copySync(
-              path.basename(release, "." + packages.release[pack].extension),
-              folder
-            );
+            fs.copySync(packagePath, folder);
             if (fs.existsSync(folder + "/compatibilitytool.vdf")) {
               let newArray = [];
               for (let line of fs
@@ -138,15 +148,11 @@ export const packageInstaller = async ({ type, pack }: IInstallerArguments) => {
             }
           }
         }
-        fs.removeSync(
-          path.basename(release, "." + packages.release[pack].extension)
-        );
+        fs.removeSync(packagePath);
       } else {
+        cd(releasesPath);
         fs.removeSync(packages.release[pack].git_name);
-        fs.moveSync(
-          path.basename(release, "." + packages.release[pack].extension),
-          packages.release[pack].git_name
-        );
+        fs.moveSync(packagePath, packages.release[pack].git_name);
       }
     }
   };

@@ -23226,7 +23226,8 @@ Name=${launcher.name}
 Exec="${`${scriptsPath}/${launcher.info.category}/${launcher.name}.sh`}"
 Type=Application
 Icon=${path2}
-Categories=HLU;Games;`
+Categories=HLU;Games;
+Keywords=HLU;`
   ).then(async () => await $4`update-desktop-database "${globalAppsPath}"`);
 };
 var generateDesktop = (launcher) => {
@@ -23549,30 +23550,31 @@ var packageInstaller = async ({ type, pack }) => {
         ext: packages.release[pack].extension
       })
     });
-    cd(releasesPath);
-    console.log("\n" + source_default.green("Downloading..."));
-    await verboseBash(`wget ${release}`);
+    const packageName = default2.basename(
+      release,
+      "." + packages.release[pack].extension
+    );
+    const packagePath = releasesPath + "/" + packageName;
+    if (!fs5.existsSync(
+      releasesPath + "/" + packageName + "." + packages.release[pack].extension
+    )) {
+      cd(releasesPath);
+      console.log("\n" + source_default.green("Downloading..."));
+      await verboseBash(`wget ${release}`);
+    }
     if ((_a2 = packages.release[pack].flags) == null ? void 0 : _a2.includes("archive")) {
-      fs5.emptyDirSync(
-        default2.basename(release, "." + packages.release[pack].extension)
-      );
+      fs5.emptyDirSync(packagePath);
       console.log("\n" + source_default.green("Extracting..."));
-      await $4`tar -xf ${default2.basename(release)} -C ${default2.basename(
-        release,
-        "." + packages.release[pack].extension
-      )} --strip-components 1`;
+      await $4`tar -xf ${packagePath + "." + packages.release[pack].extension} -C ${packagePath} --strip-components 1`;
       fs5.removeSync(default2.basename(release));
       console.log("\n" + source_default.green("Installing...") + "\n");
       if ((_b2 = packages.release[pack].flags) == null ? void 0 : _b2.includes("install")) {
         for (let folder of packages.release[pack].folders) {
-          folder = folder.replace("hlu_packspath", packagesPath).replace("home_dir", os2.homedir + "");
+          folder = folder.replaceAll("hlu_packspath", packagesPath).replaceAll("home_dir", os2.homedir);
           if (fs5.existsSync(folder)) {
             folder = folder + "/" + packages.release[pack].path.replace("name", pack);
             fs5.removeSync(folder);
-            fs5.copySync(
-              default2.basename(release, "." + packages.release[pack].extension),
-              folder
-            );
+            fs5.copySync(packagePath, folder);
             if (fs5.existsSync(folder + "/compatibilitytool.vdf")) {
               let newArray = [];
               for (let line of fs5.readFileSync(folder + "/compatibilitytool.vdf", {
@@ -23595,15 +23597,11 @@ var packageInstaller = async ({ type, pack }) => {
             }
           }
         }
-        fs5.removeSync(
-          default2.basename(release, "." + packages.release[pack].extension)
-        );
+        fs5.removeSync(packagePath);
       } else {
+        cd(releasesPath);
         fs5.removeSync(packages.release[pack].git_name);
-        fs5.moveSync(
-          default2.basename(release, "." + packages.release[pack].extension),
-          packages.release[pack].git_name
-        );
+        fs5.moveSync(packagePath, packages.release[pack].git_name);
       }
     }
   };
